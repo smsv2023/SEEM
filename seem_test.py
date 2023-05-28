@@ -187,7 +187,7 @@ for index, image_name in enumerate(image_names):
     image_array = image_array * 255
     
     # Load depth map
-    depth_map_path = os.path.join(os.path.splitext(image_name)[0], "-dpt_swin2_large_384.png")
+    depth_map_path = os.path.join(os.path.splitext(image_name)[0], f"-dpt_swin2_large_384.png")
     depth_map_img = PIL.Image.open(depth_map_path)
     depth_map = np.array(depth_map_img)
     
