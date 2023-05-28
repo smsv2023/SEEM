@@ -167,7 +167,10 @@ for index, image_name in enumerate(image_names):
         cropped_img = Image.fromarray(cropped.astype(np.uint8))
         cropped_img.save(os.path.join(cropped_image_path, f"{obj_name}_cropped.png"))        
   
-    import imageio # for pfm file access
+    # import imageio # for pfm file access
+    # imageio has issues when access pfm create by MiDaS
+    from read_pfm import read_pfm
+    from write_pfm import write_pfm
     def save_cropped_depth_map(obj, depth_map):
         # Create a binary mask for this object
         print("crop depth map of object", obj['id'])
@@ -197,7 +200,8 @@ for index, image_name in enumerate(image_names):
         # Convert to float32
         isolated_object_depth_map = isolated_object_depth_map.astype(np.float32)
         # Save the isolated object depth map to a file
-        imageio.imwrite(isolated_object_depth_map_path, isolated_object_depth_map)
+        # imageio.imwrite(isolated_object_depth_map_path, isolated_object_depth_map)
+        write_pfm(isolated_object_depth_map_path, isolated_object_depth_map)
 
     
     # scale the color values from the 0-1 range to 0-255 range
@@ -211,7 +215,8 @@ for index, image_name in enumerate(image_names):
     
     # if pfm
     depth_map_path = os.path.splitext(image_name)[0] + f"-dpt_swin2_large_384.pfm"
-    depth_map = imageio.imread(depth_map_path)
+    #depth_map = imageio.imread(depth_map_path)
+    depth_map = read_pfm(depth_map_path)
     
 
     for obj in pano_seg_info:
