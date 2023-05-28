@@ -192,7 +192,13 @@ for index, image_name in enumerate(image_names):
         #isolated_object_depth_map_img.save(isolated_object_depth_map_path)
         # if pfm
         isolated_object_depth_map_path = os.path.join(output_path, os.path.splitext(basename)[0], f"{obj_name}_isolated_object_depth_map.pmf")
+        # Normalize the depth values to [0, 1]
+        isolated_object_depth_map = (isolated_object_depth_map - np.min(isolated_object_depth_map)) / (np.max(isolated_object_depth_map) - np.min(isolated_object_depth_map))
+        # Convert to float32
+        isolated_object_depth_map = isolated_object_depth_map.astype(np.float32)
+        # Save the isolated object depth map to a file
         imageio.imwrite(isolated_object_depth_map_path, isolated_object_depth_map)
+
     
     # scale the color values from the 0-1 range to 0-255 range
     image_array = image_array * 255
