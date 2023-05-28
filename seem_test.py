@@ -187,7 +187,7 @@ for index, image_name in enumerate(image_names):
     image_array = image_array * 255
     
     # Load depth map
-    depth_map_path = os.join(os.path.splitext(image_name)[0], "-dpt_swin2_large_384.png")
+    depth_map_path = os.path.join(os.path.splitext(image_name)[0], "-dpt_swin2_large_384.png")
     depth_map_img = PIL.Image.open(depth_map_path)
     depth_map = np.array(depth_map_img)
     
@@ -196,4 +196,5 @@ for index, image_name in enumerate(image_names):
         # For each object in pano_seg_info, create a mask and crop the original image
         print ("creating cropped object and mask files...")
         save_cropped_obj_mask(obj, image_array)
+        print ("creating cropped depth map...")
         save_cropped_depth_map(obj, depth_map)
