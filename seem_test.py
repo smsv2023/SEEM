@@ -187,11 +187,12 @@ for index, image_name in enumerate(image_names):
         obj_name = str(obj['id']) + "_" + COCO_PANOPTIC_CLASSES[obj['category_id']]
 
         # Save the isolated object depth map to a file
-        isolated_object_depth_map_path = os.path.join(output_path, os.path.splitext(basename)[0], f"{obj_name}_isolated_object_depth_map.png")
         # if png
+        #isolated_object_depth_map_path = os.path.join(output_path, os.path.splitext(basename)[0], f"{obj_name}_isolated_object_depth_map.png")
         #isolated_object_depth_map_img = Image.fromarray(isolated_object_depth_map.astype(np.uint8))
         #isolated_object_depth_map_img.save(isolated_object_depth_map_path)
         # if pfm
+        isolated_object_depth_map_path = os.path.join(output_path, os.path.splitext(basename)[0], f"{obj_name}_isolated_object_depth_map.pmf")
         imageio.imwrite(isolated_object_depth_map_path, isolated_object_depth_map)
     
     # scale the color values from the 0-1 range to 0-255 range
@@ -204,7 +205,7 @@ for index, image_name in enumerate(image_names):
     #depth_map = np.array(depth_map_img)
     
     # if pfm
-    depth_map_path = os.path.join(os.path.splitext(image_name)[0], f"-dpt_swin2_large_384.pfm")
+    depth_map_path = os.path.splitext(image_name)[0] + f"-dpt_swin2_large_384.pfm"
     depth_map = imageio.imread(depth_map_path)
     
 
