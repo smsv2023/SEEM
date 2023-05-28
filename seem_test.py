@@ -176,6 +176,10 @@ for index, image_name in enumerate(image_names):
         from skimage.transform import resize
         mask_resized = resize(mask, (depth_map.shape[0], depth_map.shape[1]))
         
+        # Expand dimensions of the mask to match the depth map
+        mask_resized = np.expand_dims(mask_resized, axis=-1)
+        mask_resized = np.repeat(mask_resized, 3, axis=-1)
+
         # Isolate the object in the depth map using the mask
         isolated_object_depth_map = depth_map * mask_resized
         # Save the isolated object depth map to a file
