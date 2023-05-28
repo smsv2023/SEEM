@@ -102,6 +102,7 @@ def process_file(test_image_file):
 # get input
 import glob
 input_path = '/home/ec2-user/SAM/Segment-Everything-Everywhere-All-At-Once/demo_code/testset/'
+input_path_pfm ='/home/ec2-user/midas/MiDaS/output'
 if input_path is not None:
     image_names = glob.glob(os.path.join(input_path, "*.png"))
     num_images = len(image_names)
@@ -214,7 +215,7 @@ for index, image_name in enumerate(image_names):
     #depth_map = np.array(depth_map_img)
     
     # if pfm
-    depth_map_path = os.path.splitext(image_name)[0] + f"-dpt_swin2_large_384.pfm"
+    depth_map_path = os.path.join(input_path_pfm, os.path.splitext(basename)[0]) + f"-dpt_swin2_large_384.pfm"
     #depth_map = imageio.imread(depth_map_path)
     depth_map = read_pfm(depth_map_path)
     
