@@ -170,7 +170,7 @@ for index, image_name in enumerate(image_names):
     def save_cropped_depth_map(obj, depth_map):
         # Create a binary mask for this object
         print("crop depth map of object", obj['id'])
-        mask = (pano_seg == obj['id']).cpu().numpy().astype(np.uint8)
+        mask = (pano_seg == obj['id']).cpu().numpy().astype(np.uint8) * 255
         
         # Resize the mask to match the depth_map dimensions
         from skimage.transform import resize
