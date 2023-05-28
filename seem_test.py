@@ -103,7 +103,7 @@ def process_file(test_image_file):
 import glob
 input_path = '/home/ec2-user/SAM/Segment-Everything-Everywhere-All-At-Once/demo_code/testset/'
 if input_path is not None:
-    image_names = glob.glob(os.path.join(input_path, "*"))
+    image_names = glob.glob(os.path.join(input_path, "*.png"))
     num_images = len(image_names)
 else:
     print("No input path specified.")
