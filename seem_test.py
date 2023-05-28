@@ -142,7 +142,7 @@ for index, image_name in enumerate(image_names):
     #with open('pano_seg_info.json', 'r') as f:
     #    pano_seg_info = json.load(f)
 
-    def save_cropped_obj_mask(obj):
+    def save_cropped_obj_mask(obj, image_array):
         # Create a binary mask for this object
         print("object", obj['id'])
 
@@ -172,5 +172,5 @@ for index, image_name in enumerate(image_names):
     # scale the color values from the 0-1 range to 0-255 range
     image_array = image_array * 255
     for obj in pano_seg_info:
-        save_cropped_obj_mask(obj)
+        save_cropped_obj_mask(obj, image_array)
 
