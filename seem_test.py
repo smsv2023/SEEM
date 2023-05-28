@@ -167,7 +167,7 @@ for index, image_name in enumerate(image_names):
         cropped_img = Image.fromarray(cropped.astype(np.uint8))
         cropped_img.save(os.path.join(cropped_image_path, f"{obj_name}_cropped.png"))        
     
-    def save_cropped_depth_map(obj, depth_map)
+    def save_cropped_depth_map(obj, depth_map):
         # Create a binary mask for this object
         print("crop depth map of object", obj['id'])
         mask = (pano_seg == obj['id']).cpu().numpy().astype(np.uint8)
