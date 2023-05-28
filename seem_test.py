@@ -182,8 +182,11 @@ for index, image_name in enumerate(image_names):
 
         # Isolate the object in the depth map using the mask
         isolated_object_depth_map = depth_map * mask_resized
+        
+        obj_name = str(obj['id']) + "_" + COCO_PANOPTIC_CLASSES[obj['category_id']]
+
         # Save the isolated object depth map to a file
-        isolated_object_depth_map_path = os.path.join(output_path, os.path.splitext(basename)[0], f"{obj['id']}_isolated_object_depth_map.png")
+        isolated_object_depth_map_path = os.path.join(output_path, os.path.splitext(basename)[0], f"{obj_name}_isolated_object_depth_map.png")
         isolated_object_depth_map_img = Image.fromarray(isolated_object_depth_map.astype(np.uint8))
         isolated_object_depth_map_img.save(isolated_object_depth_map_path)
     
