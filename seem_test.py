@@ -144,7 +144,7 @@ for index, image_name in enumerate(image_names):
 
     def save_cropped_obj_mask(obj, image_array):
         # Create a binary mask for this object
-        print("object", obj['id'])
+        print("Crop object", obj['id'])
 
         mask = (pano_seg == obj['id']).cpu().numpy().astype(np.uint8) * 255
 
@@ -167,10 +167,33 @@ for index, image_name in enumerate(image_names):
         cropped_img = Image.fromarray(cropped.astype(np.uint8))
         cropped_img.save(os.path.join(cropped_image_path, f"{obj_name}_cropped.png"))        
     
-    # For each object in pano_seg_info, create a mask and crop the original image
-    print ("creating cropped object and mask files...")
+    def save_cropped_depth_map(obj, depth_map)
+        # Create a binary mask for this object
+        print("crop depth map of object", obj['id'])
+        mask = (pano_seg == obj['id']).cpu().numpy().astype(np.uint8)
+        
+        # Resize the mask to match the depth_map dimensions
+        from skimage.transform import resize
+        mask_resized = resize(mask, (depth_map.shape[0], depth_map.shape[1]))
+        
+        # Isolate the object in the depth map using the mask
+        isolated_object_depth_map = depth_map * mask_resized
+        # Save the isolated object depth map to a file
+        isolated_object_depth_map_path = os.path.join(output_path, os.path.splitext(basename)[0], f"{obj['id']}_isolated_object_depth_map.png")
+        isolated_object_depth_map_img = Image.fromarray(isolated_object_depth_map.astype(np.uint8))
+        isolated_object_depth_map_img.save(isolated_object_depth_map_path)
+    
     # scale the color values from the 0-1 range to 0-255 range
     image_array = image_array * 255
-    for obj in pano_seg_info:
-        save_cropped_obj_mask(obj, image_array)
+    
+    # Load depth map
+    depth_map_path = os.join(os.path.splitext(image_name)[0], "-dpt_swin2_large_384.png")
+    depth_map_img = PIL.Image.open(depth_map_path)
+    depth_map = np.array(depth_map_img)
+    
 
+    for obj in pano_seg_info:
+        # For each object in pano_seg_info, create a mask and crop the original image
+        print ("creating cropped object and mask files...")
+        save_cropped_obj_mask(obj, image_array)
+        save_cropped_depth_map(obj, depth_map)
