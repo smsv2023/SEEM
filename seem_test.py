@@ -114,64 +114,63 @@ if output_path is not None:
     os.makedirs(output_path, exist_ok=True)
 print("Start processing")
 
-if input_path is not None:
-    if output_path is None:
-        print("Warning: No output path specified. Images will be processed but not shown or stored anywhere.")
-    for index, image_name in enumerate(image_names):
-        basename = os.path.basename(image_name)
-        print("  Processing {} ({}/{})".format(image_name, index + 1, num_images))
-        # open the image file and process
-        pano_seg, pano_seg_info, image_array = process_file(image_name)
+for index, image_name in enumerate(image_names):
+    basename = os.path.basename(image_name)
+    print("  Processing {} ({}/{})".format(image_name, index + 1, num_images))
+    # open the image file and process
+    pano_seg, pano_seg_info, image_array = process_file(image_name)
 
-        print("saving result files...")
+    print("saving result files...")
 
-        # Save pano_seg tensor
-        output_pth_file = output_path + os.path.splitext(basename)[0]+"_result.pth"
-        torch.save(pano_seg, output_pth_file)
+    # Save pano_seg tensor
+    output_pth_file = output_path + os.path.splitext(basename)[0]+"_result.pth"
+    torch.save(pano_seg, output_pth_file)
 
-        # Save pano_seg_info list of dictionaries
-        #import pickle
-        #output_pkl_file = output_path + os.path.splitext(basename)[0]+"_result.pkl"
-        #with open(output_pkl_file, 'wb') as f:
-        #   pickle.dump(pano_seg_info, f)
+    # Save pano_seg_info list of dictionaries
+    #import pickle
+    #output_pkl_file = output_path + os.path.splitext(basename)[0]+"_result.pkl"
+    #with open(output_pkl_file, 'wb') as f:
+    #   pickle.dump(pano_seg_info, f)
 
-        import json
-        output_json_file = output_path + os.path.splitext(basename)[0]+"_result.json"
-        # Save pano_seg_info list of dictionaries
-        with open(output_json_file, 'w') as f:
-            json.dump(pano_seg_info, f)
+    import json
+    output_json_file = output_path + os.path.splitext(basename)[0]+"_result.json"
+    # Save pano_seg_info list of dictionaries
+    with open(output_json_file, 'w') as f:
+        json.dump(pano_seg_info, f)
 
-        # Load pano_seg_info list of dictionaries
-        #with open('pano_seg_info.json', 'r') as f:
-        #    pano_seg_info = json.load(f)
+    # Load pano_seg_info list of dictionaries
+    #with open('pano_seg_info.json', 'r') as f:
+    #    pano_seg_info = json.load(f)
 
-        # For each object in pano_seg_info, create a mask and crop the original image
-        print ("creating cropped object and mask files...")
-        # scale the color values from the 0-1 range to 0-255 range
-        image_array = image_array * 255
-        for obj in pano_seg_info:
-            # Create a binary mask for this object
-            print("object", obj['id'])
+    def save_cropped_obj_mask(obj):
+        # Create a binary mask for this object
+        print("object", obj['id'])
 
-            mask = (pano_seg == obj['id']).cpu().numpy().astype(np.uint8) * 255
+        mask = (pano_seg == obj['id']).cpu().numpy().astype(np.uint8) * 255
 
-            # Resize the mask to match the image_array dimensions
-            from skimage.transform import resize
-            mask_resized = resize(mask, (image_array.shape[0], image_array.shape[1]))
+        # Resize the mask to match the image_array dimensions
+        from skimage.transform import resize
+        mask_resized = resize(mask, (image_array.shape[0], image_array.shape[1]))
 
+        # Crop the original image using the mask
+        cropped = image_array * np.expand_dims(mask_resized, axis=-1)
 
-            # Crop the original image using the mask
-            cropped = image_array * np.expand_dims(mask_resized, axis=-1)
+        # Save the mask and cropped image to files
+        cropped_image_path=os.path.join(output_path, os.path.splitext(basename)[0])
+        os.makedirs(cropped_image_path, exist_ok=True)
 
-            # Save the mask and cropped image to files
-            cropped_image_path=os.path.join(output_path, os.path.splitext(basename)[0])
-            os.makedirs(cropped_image_path, exist_ok=True)
-
-            obj_name = str(obj['id']) + "_" + COCO_PANOPTIC_CLASSES[obj['category_id']]
-            print("saving object: %s..."%obj_name)
-            mask_img = Image.fromarray(mask)
-            #mask_img.save(os.path.join(cropped_image_path, f"{obj['id']}_mask.png"))
-            mask_img.save(os.path.join(cropped_image_path, f"{obj_name}_mask.png"))
-            cropped_img = Image.fromarray(cropped.astype(np.uint8))
-            cropped_img.save(os.path.join(cropped_image_path, f"{obj_name}_cropped.png"))
+        obj_name = str(obj['id']) + "_" + COCO_PANOPTIC_CLASSES[obj['category_id']]
+        print("saving object: %s..."%obj_name)
+        mask_img = Image.fromarray(mask)
+        #mask_img.save(os.path.join(cropped_image_path, f"{obj['id']}_mask.png"))
+        mask_img.save(os.path.join(cropped_image_path, f"{obj_name}_mask.png"))
+        cropped_img = Image.fromarray(cropped.astype(np.uint8))
+        cropped_img.save(os.path.join(cropped_image_path, f"{obj_name}_cropped.png"))        
+    
+    # For each object in pano_seg_info, create a mask and crop the original image
+    print ("creating cropped object and mask files...")
+    # scale the color values from the 0-1 range to 0-255 range
+    image_array = image_array * 255
+    for obj in pano_seg_info:
+        save_cropped_obj_mask(obj)
 
