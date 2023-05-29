@@ -196,8 +196,8 @@ for index, image_name in enumerate(image_names):
         #isolated_object_depth_map_img.save(isolated_object_depth_map_path)
         # if pfm
         isolated_object_depth_map_path = os.path.join(output_path, os.path.splitext(basename)[0], f"{obj_name}_isolated_object_depth_map.pmf")
-        # Normalize the depth values to [0, 1]
-        isolated_object_depth_map = (isolated_object_depth_map - np.min(isolated_object_depth_map)) / (np.max(isolated_object_depth_map) - np.min(isolated_object_depth_map))
+        # Normalize the depth values to [0, 1], original pfm is not nomalized, so don't do it. 
+        # isolated_object_depth_map = (isolated_object_depth_map - np.min(isolated_object_depth_map)) / (np.max(isolated_object_depth_map) - np.min(isolated_object_depth_map))
         # Convert to float32
         isolated_object_depth_map = isolated_object_depth_map.astype(np.float32)
         # Save the isolated object depth map to a file
