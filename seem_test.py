@@ -176,7 +176,7 @@ for index, image_name in enumerate(image_names):
         # Create a binary mask for this object
         print("crop depth map of object", obj['id'])
         obj_name = str(obj['id']) + "_" + COCO_PANOPTIC_CLASSES[obj['category_id']]
-        mask = (pano_seg == obj['id']).cpu().numpy().astype(np.uint8) * 255
+        mask = (pano_seg == obj['id']).cpu().numpy().astype(np.uint8)
         
         # Resize the mask to match the depth_map dimensions
         from skimage.transform import resize
