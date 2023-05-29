@@ -181,6 +181,8 @@ for index, image_name in enumerate(image_names):
         # Resize the mask to match the depth_map dimensions
         from skimage.transform import resize
         mask_resized = resize(mask, (depth_map.shape[0], depth_map.shape[1]))
+        # binarize the mask again, value between 0 and 1 can be introduced when resizing
+        mask_resized = (mask_resized > 0.5).astype(np.uint8) 
         
         # if png, expand dimensions of the mask to match the depth map
         #mask_resized = np.expand_dims(mask_resized, axis=-1)
