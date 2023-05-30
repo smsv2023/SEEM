@@ -80,14 +80,36 @@ def show_corners(image, dst):
     cv2.destroyAllWindows()
     '''
 
+def ORB(gray):
+    # Create an ORB object
+    orb = cv2.ORB_create()
+
+    # Detect the key points
+    key_points = orb.detect(image, None)
+
+    # Compute the descriptors
+    key_points, descriptors = orb.compute(image, key_points)
+    return key_points
+
+def show_ORB(image, key_points):
+    # Draw the key points on the image
+    image_with_key_points = cv2.drawKeypoints(image, key_points, None, color=(0, 255, 0), flags=0)
+
+    # Display the image
+    plt.imshow(image_with_key_points), plt.show()
+
 # Load the image
 folder ='/Users/seanmao/Pictures/SEEM/output/Test001'
 file = '10_dining table_cropped.png'
 image = cv2.imread(os.path.join(folder, file))
 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-sobelx, sobely, sobelxy = sobel_detection(gray)
-show_sobel_edge(image, sobelx, sobely, sobelxy)
+key_points = ORB(gray)
+show_ORB(image, key_points)
+#edges=canny_detection(gray)
+#show_canny(image, edges)
+#sobelx, sobely, sobelxy = sobel_detection(gray)
+#show_sobel_edge(image, sobelx, sobely, sobelxy)
 #lines = detect_line(gray)
 #show_lines(image, lines)
 #dst = detect_corner_points(gray)
