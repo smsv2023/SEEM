@@ -1,30 +1,82 @@
 import cv2
 import numpy as np
+import os
+
+# Probabilistic Hough
+def detect_line(gray): 
+    # Perform Canny edge detection
+    edges = cv2.Canny(gray, 50, 150, apertureSize=3)
+
+    # Perform Probabilistic Hough Transform
+    lines = cv2.HoughLinesP(edges, 1, np.pi/180, 100, minLineLength=100, maxLineGap=10)
+    return lines
+
+def show_lines(image, lines):
+    # Draw the lines on the original image
+    for line in lines:
+        x1, y1, x2, y2 = line[0]
+        cv2.line(image, (x1, y1), (x2, y2), (0, 0, 255), 2)
+
+    # Show the image
+    cv2.imshow('Image with lines', image)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+# Sobel Edge Detection
+def sobel_detection(gray):
+    # Blur the image for better edge detection
+    img_blur = cv2.GaussianBlur(img_gray, (3,3), 0) 
+
+    # Sobel Edge Detection
+    sobelx = cv2.Sobel(src=img_blur, ddepth=cv2.CV_64F, dx=1, dy=0, ksize=5) # Sobel Edge Detection on the X axis
+    sobely = cv2.Sobel(src=img_blur, ddepth=cv2.CV_64F, dx=0, dy=1, ksize=5) # Sobel Edge Detection on the Y axis
+    sobelxy = cv2.Sobel(src=img_blur, ddepth=cv2.CV_64F, dx=1, dy=1, ksize=5) # Combined X and Y Sobel Edge Detection
+    return sobelx, sobely, sobelxy
+def show_sobel_edge(image, sobelx, sobely, sobelxy):
+    # Display Sobel Edge Detection Images
+    cv2.imshow('Sobel X', sobelx)
+    cv2.waitKey(0)
+    cv2.imshow('Sobel Y', sobely)
+    cv2.waitKey(0)
+    cv2.imshow('Sobel X Y using Sobel() function', sobelxy)
+    cv2.waitKey(0)
+
+    # Canny Edge Detection
+    edges = cv2.Canny(image=img_blur, threshold1=100, threshold2=200) # Canny Edge Detection
+
+    # Display Canny Edge Detection Image
+    cv2.imshow('Canny Edge Detection', edges)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+def detect_corner_points(gray):
+    # Convert to float
+    gray = np.float32(gray)
+
+    # Apply Harris Corner detection
+    dst = cv2.cornerHarris(gray, 2, 3, 0.04)
+
+    # Dilate to mark the corners
+    dst = cv2.dilate(dst, None)
+    return dst
+
+def show_corners(image, dst):
+    '''
+    # Threshold for an optimal value, it may vary depending on the image
+    image[dst > 0.01 * dst.max()] = [0, 0, 255]
+    cv2.imshow('Harris Corners', image)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+    '''
 
 # Load the image
-image = cv2.imread('image.jpg')
+folder ='/Users/seanmao/Pictures/SEEM/output/Test001'
+file = '10_dining table_cropped.png'
+image = cv2.imread(os.path.join(folder, file))
 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-# Perform Canny edge detection
-edges = cv2.Canny(gray, 50, 150, apertureSize=3)
 
-# Perform Hough Line Transform
-lines = cv2.HoughLines(edges, 1, np.pi/180, 200)
-
-# Draw the lines on the original image
-for line in lines:
-    rho, theta = line[0]
-    a = np.cos(theta)
-    b = np.sin(theta)
-    x0 = a * rho
-    y0 = b * rho
-    x1 = int(x0 + 1000 * (-b))
-    y1 = int(y0 + 1000 * (a))
-    x2 = int(x0 - 1000 * (-b))
-    y2 = int(y0 - 1000 * (a))
-    cv2.line(image, (x1, y1), (x2, y2), (0, 0, 255), 2)
-
-# Show the image
-cv2.imshow('Image with lines', image)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+#lines = detect_line(gray)
+#show_lines(image, lines)
+#dst = detect_corner_points(gray)
+#show_corners(image, dst)
