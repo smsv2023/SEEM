@@ -118,6 +118,7 @@ def cluster_lines(lines):
 # fine lines nearly paralle
 # distance of lines can vary due to the pespective distortion
 def nearly_parallel(lines):
+    prallel_lines = []
     for i in range(len(lines)):
         for j in range(i + 1, len(lines)):
             line1 = lines[i]
@@ -125,6 +126,8 @@ def nearly_parallel(lines):
             if abs(line1.orientation - line2.orientation) < orientation_threshold and \
                np.linalg.norm(line1.center - line2.center) < distance_threshold:
                 # The lines are nearly parallel and close to each other
+                prallel_lines.append(line1, line2)
+                
 
 # Homography estimation: OpenCV provides functions to estimate a homography matrix 
 # given a set of point correspondences. You would need to manually select four points 
