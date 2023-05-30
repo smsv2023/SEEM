@@ -82,6 +82,7 @@ def show_corners(image, dst):
     cv2.destroyAllWindows()
     '''
 
+# ORB (Oriented FAST and Rotated BRIEF) to detect key points in the image. 
 def ORB(gray):
     # Create an ORB object
     orb = cv2.ORB_create()
@@ -114,7 +115,21 @@ def cluster_lines(lines):
     labels = clustering.labels_
     return clustering
 
-    
+# fine lines nearly paralle
+# distance of lines can vary due to the pespective distortion
+def nearly_parallel(lines):
+    for i in range(len(lines)):
+        for j in range(i + 1, len(lines)):
+            line1 = lines[i]
+            line2 = lines[j]
+            if abs(line1.orientation - line2.orientation) < orientation_threshold and \
+               np.linalg.norm(line1.center - line2.center) < distance_threshold:
+                # The lines are nearly parallel and close to each other
+
+# Homography estimation: OpenCV provides functions to estimate a homography matrix 
+# given a set of point correspondences. You would need to manually select four points 
+# in your image that form a rectangle, and a corresponding rectangle in a fronto-parallel view:
+        
 # Load the image
 folder ='/Users/seanmao/Pictures/SEEM/output/Test001'
 file = '10_dining table_cropped.png'
