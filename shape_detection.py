@@ -128,7 +128,19 @@ def nearly_parallel(lines):
 
 # Homography estimation: OpenCV provides functions to estimate a homography matrix 
 # given a set of point correspondences. You would need to manually select four points 
-# in your image that form a rectangle, and a corresponding rectangle in a fronto-parallel view:
+# in your image that form a rectangle, and a corresponding rectangle in a fronto-parallel view
+def homo_estimation():
+    # Points in the original image
+    pts_src = np.array([[x1, y1], [x2, y2], [x3, y3], [x4, y4]])
+
+    # Points in the fronto-parallel view
+    pts_dst = np.array([[0, 0], [width, 0], [width, height], [0, height]])
+
+    # Estimate homography
+    h, status = cv2.findHomography(pts_src, pts_dst)
+
+    # Warp source image to destination
+    im_out = cv2.warpPerspective(im_src, h, (width, height))
         
 # Load the image
 folder ='/Users/seanmao/Pictures/SEEM/output/Test001'
@@ -136,13 +148,16 @@ file = '10_dining table_cropped.png'
 image = cv2.imread(os.path.join(folder, file))
 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
+lines = detect_line(gray)
+#show_lines(image, lines)
+clustering = cluster_lines(lines)
+print(clustering.labels_)
+
 #key_points = ORB(gray)
 #show_ORB(image, key_points)
 #edges=canny_detection(gray)
 #show_canny(image, edges)
 #sobelx, sobely, sobelxy = sobel_detection(gray)
 #show_sobel_edge(image, sobelx, sobely, sobelxy)
-#lines = detect_line(gray)
-#show_lines(image, lines)
 #dst = detect_corner_points(gray)
 #show_corners(image, dst)
