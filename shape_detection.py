@@ -2,6 +2,17 @@ import cv2
 import numpy as np
 import os
 
+def canny_detection(gray):
+    # Perform Canny edge detection
+    edges = cv2.Canny(gray, 50, 150, apertureSize=3)
+    return edges
+
+def show_canny(image, edges):
+    # Display Canny Edge Detection Image
+    cv2.imshow('Canny Edge Detection', edges)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
 # Probabilistic Hough
 def detect_line(gray): 
     # Blur the image for better edge detection
@@ -31,7 +42,7 @@ def show_lines(image, lines):
 # Sobel Edge Detection
 def sobel_detection(gray):
     # Blur the image for better edge detection
-    img_blur = cv2.GaussianBlur(img_gray, (3,3), 0) 
+    img_blur = cv2.GaussianBlur(gray, (3,3), 0) 
 
     # Sobel Edge Detection
     sobelx = cv2.Sobel(src=img_blur, ddepth=cv2.CV_64F, dx=1, dy=0, ksize=5) # Sobel Edge Detection on the X axis
