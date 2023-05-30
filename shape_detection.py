@@ -2,10 +2,11 @@ import cv2
 import numpy as np
 
 # Load the image
-image = cv2.imread('image.jpg', cv2.IMREAD_GRAYSCALE)
+image = cv2.imread('image.jpg')
+gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
 # Perform Canny edge detection
-edges = cv2.Canny(image, 50, 150, apertureSize=3)
+edges = cv2.Canny(gray, 50, 150, apertureSize=3)
 
 # Perform Hough Line Transform
 lines = cv2.HoughLines(edges, 1, np.pi/180, 200)
