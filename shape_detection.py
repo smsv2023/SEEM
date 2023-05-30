@@ -4,9 +4,15 @@ import os
 
 # Probabilistic Hough
 def detect_line(gray): 
+    # Blur the image for better edge detection
+    #img_blur = cv2.GaussianBlur(gray, (3,3), 0) 
+    
     # Perform Canny edge detection
     edges = cv2.Canny(gray, 50, 150, apertureSize=3)
-
+    
+    # Perform Canny Edge Detection
+    #edges = cv2.Canny(image=img_blur, threshold1=100, threshold2=200) # Canny Edge Detection
+    
     # Perform Probabilistic Hough Transform
     lines = cv2.HoughLinesP(edges, 1, np.pi/180, 100, minLineLength=100, maxLineGap=10)
     return lines
@@ -32,6 +38,7 @@ def sobel_detection(gray):
     sobely = cv2.Sobel(src=img_blur, ddepth=cv2.CV_64F, dx=0, dy=1, ksize=5) # Sobel Edge Detection on the Y axis
     sobelxy = cv2.Sobel(src=img_blur, ddepth=cv2.CV_64F, dx=1, dy=1, ksize=5) # Combined X and Y Sobel Edge Detection
     return sobelx, sobely, sobelxy
+
 def show_sobel_edge(image, sobelx, sobely, sobelxy):
     # Display Sobel Edge Detection Images
     cv2.imshow('Sobel X', sobelx)
@@ -41,13 +48,6 @@ def show_sobel_edge(image, sobelx, sobely, sobelxy):
     cv2.imshow('Sobel X Y using Sobel() function', sobelxy)
     cv2.waitKey(0)
 
-    # Canny Edge Detection
-    edges = cv2.Canny(image=img_blur, threshold1=100, threshold2=200) # Canny Edge Detection
-
-    # Display Canny Edge Detection Image
-    cv2.imshow('Canny Edge Detection', edges)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
 
 def detect_corner_points(gray):
     # Convert to float
