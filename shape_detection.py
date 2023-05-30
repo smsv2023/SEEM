@@ -75,7 +75,8 @@ file = '10_dining table_cropped.png'
 image = cv2.imread(os.path.join(folder, file))
 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-
+sobelx, sobely, sobelxy = sobel_detection(gray)
+show_sobel_edge(image, sobelx, sobely, sobelxy)
 #lines = detect_line(gray)
 #show_lines(image, lines)
 #dst = detect_corner_points(gray)
