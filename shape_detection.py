@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import os
 import matplotlib.pyplot as plt
+from sklearn.cluster import DBSCAN
 
 def canny_detection(gray):
     # Perform Canny edge detection
@@ -99,14 +100,28 @@ def show_ORB(image, key_points):
     # Display the image
     plt.imshow(image_with_key_points), plt.show()
 
+# use a clustering algorithm like DBSCAN, which can group together 
+# line segments that are close in terms of both distance and orientation. 
+def cluster_lines():
+    # Create an array where each row represents a line segment
+    # The columns could be the coordinates of the center point and the orientation
+    lines = np.array([[x_center, y_center, orientation] for line in lines])
+
+    # Apply DBSCAN
+    clustering = DBSCAN(eps=0.3, min_samples=2).fit(lines)
+
+    # The labels_ attribute contains the cluster labels for each line segment
+    labels = clustering.labels_
+
+    
 # Load the image
 folder ='/Users/seanmao/Pictures/SEEM/output/Test001'
 file = '10_dining table_cropped.png'
 image = cv2.imread(os.path.join(folder, file))
 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-key_points = ORB(gray)
-show_ORB(image, key_points)
+#key_points = ORB(gray)
+#show_ORB(image, key_points)
 #edges=canny_detection(gray)
 #show_canny(image, edges)
 #sobelx, sobely, sobelxy = sobel_detection(gray)
