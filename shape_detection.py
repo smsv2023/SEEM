@@ -102,16 +102,17 @@ def show_ORB(image, key_points):
 
 # use a clustering algorithm like DBSCAN, which can group together 
 # line segments that are close in terms of both distance and orientation. 
-def cluster_lines():
+def cluster_lines(lines):
     # Create an array where each row represents a line segment
     # The columns could be the coordinates of the center point and the orientation
-    lines = np.array([[x_center, y_center, orientation] for line in lines])
+    lines_array = np.array([[x_center, y_center, orientation] for line in lines])
 
     # Apply DBSCAN
-    clustering = DBSCAN(eps=0.3, min_samples=2).fit(lines)
+    clustering = DBSCAN(eps=0.3, min_samples=2).fit(lines_array)
 
     # The labels_ attribute contains the cluster labels for each line segment
     labels = clustering.labels_
+    return clustering
 
     
 # Load the image
