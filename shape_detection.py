@@ -201,7 +201,7 @@ gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 lines = detect_line(gray)
 #show_lines(image, lines)
 clustering = cluster_lines(lines)
-lables = clustering.labels_
+labels = clustering.labels_
 show_clusters(lines, labels)
 #key_points = ORB(gray)
 #show_ORB(image, key_points)
