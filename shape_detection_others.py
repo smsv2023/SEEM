@@ -1,4 +1,4 @@
-    cv2.destroyAllWindows()
+
 
 # Sobel Edge Detection
 def sobel_detection(gray):
@@ -110,3 +110,33 @@ def line_distance_intersect_axises(line1, line2):
 
     # Return the sum of the distances
     return np.sqrt(dx**2 + dy**2)
+
+# fine lines nearly paralle
+# distance of lines can vary due to the pespective distortion
+def nearly_parallel(lines):
+    prallel_lines = []
+    for i in range(len(lines)):
+        for j in range(i + 1, len(lines)):
+            line1 = lines[i]
+            line2 = lines[j]
+            if abs(line1.orientation - line2.orientation) < orientation_threshold and \
+               np.linalg.norm(line1.center - line2.center) < distance_threshold:
+                # The lines are nearly parallel and close to each other
+                prallel_lines.append(line1, line2)
+                
+
+# Homography estimation: OpenCV provides functions to estimate a homography matrix 
+# given a set of point correspondences. You would need to manually select four points 
+# in your image that form a rectangle, and a corresponding rectangle in a fronto-parallel view
+def homo_estimation():
+    # Points in the original image
+    pts_src = np.array([[x1, y1], [x2, y2], [x3, y3], [x4, y4]])
+
+    # Points in the fronto-parallel view
+    pts_dst = np.array([[0, 0], [width, 0], [width, height], [0, height]])
+
+    # Estimate homography
+    h, status = cv2.findHomography(pts_src, pts_dst)
+
+    # Warp source image to destination
+    im_out = cv2.warpPerspective(im_src, h, (width, height))
