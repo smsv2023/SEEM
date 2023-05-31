@@ -250,8 +250,8 @@ def find_representative_lines(lines, labels):
         max_proj = np.max(projections)
 
         # Compute the start and end points of the representative line
-        start = np.round(np.array([min_proj * dx, min_proj * dy])).astype(int)
-        end = np.round(np.array([max_proj * dx, max_proj * dy])).astype(int)
+        start = np.round(mean_point + np.array([min_proj * dx, min_proj * dy])).astype(int)
+        end = np.round(mean_point + np.array([max_proj * dx, max_proj * dy])).astype(int)
 
 
         # Create a new line with these points
