@@ -224,6 +224,7 @@ def show_clusters(lines, labels):
 def find_representative_lines(lines, labels):
     # Initialize an empty list to hold the representative lines
     representative_lines = []
+
     # For each cluster label...
     for label in set(labels):
         # Get the lines in this cluster
@@ -238,16 +239,19 @@ def find_representative_lines(lines, labels):
         dx /= length
         dy /= length
 
+        # Compute the mean point of the line segments
+        mean_point = np.mean(cluster_lines[:, :2], axis=0)
+
         # Project the start and end points onto the direction
-        projections = cluster_lines[:, [0, 2]] * dx + cluster_lines[:, [1, 3]] * dy
+        projections = (cluster_lines[:, [0, 2]] - mean_point[0]) * dx + (cluster_lines[:, [1, 3]] - mean_point[1]) * dy
 
         # Find the minimum and maximum projections
         min_proj = np.min(projections)
         max_proj = np.max(projections)
 
         # Compute the start and end points of the representative line
-        start = np.round(np.array([min_proj * dx, min_proj * dy])).astype(int)
-        end = np.round(np.array([max_proj * dx, max_proj * dy])).astype(int)
+        start = mean_point + np.array([min_proj * dx, min_proj * dy])
+        end = mean_point + np.array([max_proj * dx, max_proj * dy])
 
         # Create a new line with these points
         representative_line = np.concatenate([start, end])
