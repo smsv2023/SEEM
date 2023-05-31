@@ -225,7 +225,7 @@ def show_clusters(lines, labels):
 def find_representative_lines(lines, labels):
     # Initialize an empty list to hold the representative lines
     representative_lines = []
-
+    lines = lines.reshape(-1, 4)
     # For each cluster label...
     for label in set(labels):
         # Get the lines in this cluster
