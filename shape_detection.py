@@ -67,8 +67,16 @@ def line_distance(line1, line2):
     cos_angle = np.clip(cos_angle, -1, 1)
     direction_difference = np.arccos(cos_angle)
 
-    # Combine the two distances into a single measure
-    distance = center_distance + direction_difference
+    # Normalize center distance and direction difference
+    center_distance_normalized = center_distance / np.sqrt(width**2 + height**2)
+    direction_difference_normalized = direction_difference / np.pi
+
+    # Define weights
+    center_distance_weight = 0.5
+    direction_difference_weight = 0.5
+    
+    # Calculate final distance
+    distance = center_distance_weight * center_distance_normalized + direction_difference_weight * direction_difference_normalized
 
     return distance
 
