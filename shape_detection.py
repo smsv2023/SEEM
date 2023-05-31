@@ -120,6 +120,7 @@ def convert_to_polar_lines(lines):
     return polar_lines
 
 # Define custom distance function
+# not good, because small theta change will cause big rho difference.
 def hough_distance(line1, line2):
     rho1, theta1 = line1
     rho2, theta2 = line2
@@ -130,6 +131,26 @@ def hough_distance(line1, line2):
 
     # Use some weighting scheme, for example:
     return rho_diff + theta_diff
+
+# use distance between two lines could then be defined as the sum of the 
+# distances between the corresponding endpoints. 
+def line_distance(line1, line2):
+    # Unpack the endpoints of the lines
+    x1_1, y1_1, x2_1, y2_1 = line1
+    x1_2, y1_2, x2_2, y2_2 = line2
+
+    # Calculate the intersection points with the x and y axes
+    x_int_1 = x1_1 - y1_1 * (x2_1 - x1_1) / (y2_1 - y1_1)
+    y_int_1 = y1_1 - x1_1 * (y2_1 - y1_1) / (x2_1 - x1_1)
+    x_int_2 = x1_2 - y1_2 * (x2_2 - x1_2) / (y2_2 - y1_2)
+    y_int_2 = y1_2 - x1_2 * (y2_2 - y1_2) / (x2_2 - x1_2)
+
+    # Calculate the distances between the corresponding points
+    dx = x_int_1 - x_int_2
+    dy = y_int_1 - y_int_2
+
+    # Return the sum of the distances
+    return np.sqrt(dx**2 + dy**2)
 
 # use a clustering algorithm like DBSCAN, which can group together 
 # line segments that are close in terms of both distance and orientation. 
