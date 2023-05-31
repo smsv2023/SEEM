@@ -1,4 +1,6 @@
-
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
 
 # Sobel Edge Detection
 def sobel_detection(gray):
