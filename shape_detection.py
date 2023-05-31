@@ -101,7 +101,7 @@ def show_ORB(image, key_points):
     # Display the image
     plt.imshow(image_with_key_points), plt.show()
 
-# convert lines with starting/ending points to lines in the polar coordinate system
+# convert lines from Probabilistic Hough Transform with starting/ending points to lines in the polar coordinate system
 def convert_to_polar_lines(lines):
     polar_lines = []
     for line in lines:
@@ -150,7 +150,17 @@ def cluster_lines(lines):
     labels = clustering.labels_
     return clustering
 
-
+def show_clusters(lines, lables):
+    # Create a list of colors for each cluster
+    colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']    
+    # Plot each line with color corresponding to its cluster
+    for i, line in enumerate(lines):
+        x1, y1, x2, y2 = line
+        # Choose color based on cluster label
+        color = colors[labels[i] % len(colors)]
+        plt.plot((x1, x2), (y1, y2), color=color)
+    plt.show()
+    
 # fine lines nearly paralle
 # distance of lines can vary due to the pespective distortion
 def nearly_parallel(lines):
@@ -190,8 +200,8 @@ gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 lines = detect_line(gray)
 #show_lines(image, lines)
 clustering = cluster_lines(lines)
-print(clustering.labels_)
-
+lables = clustering.labels_
+show_clusters(lines, lables)
 #key_points = ORB(gray)
 #show_ORB(image, key_points)
 #edges=canny_detection(gray)
