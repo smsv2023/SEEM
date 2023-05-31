@@ -149,7 +149,6 @@ def find_representative_lines(lines, labels):
         cluster_lines = lines[labels == label]
         representative_line = find_representative_line(cluster_lines)
 
-
         # Add this line to the list of representative lines
         representative_lines.append(representative_line)
 
