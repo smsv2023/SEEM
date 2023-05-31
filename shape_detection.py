@@ -160,6 +160,8 @@ def show_clusters(lines, labels):
         # Choose color based on cluster label
         color = colors[labels[i] % len(colors)]
         plt.plot((x1, x2), (y1, y2), color=color)
+    # plt's origin is at left bottom, so flip it vertically
+    plt.gca().invert_yaxis()
     plt.show()
     
 # fine lines nearly paralle
