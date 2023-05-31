@@ -164,9 +164,10 @@ def cluster_lines(lines):
     # Apply DBSCAN
     #clustering = DBSCAN(eps=0.3, min_samples=2).fit(lines_array)
     # use customer distance for the polar system lines
-    polar_lines = convert_to_polar_lines(lines)
+    #polar_lines = convert_to_polar_lines(lines)
     # default eps is 0.5, use 5 to get more clusters
-    clustering = DBSCAN(eps=5, min_samples=2, metric=hough_distance).fit(polar_lines)
+    #clustering = DBSCAN(eps=5, min_samples=2, metric=hough_distance).fit(polar_lines)
+    clustering = DBSCAN(eps=5, min_samples=2, metric=line_distance).fit(lines)
 
     # The labels_ attribute contains the cluster labels for each line segment
     labels = clustering.labels_
