@@ -302,7 +302,9 @@ lines = detect_line(gray)
 
 clustering = cluster_lines(lines)
 labels = clustering.labels_
-show_clusters(lines, labels)
+representative_lines=find_representative_lines(lines, labels)
+show_lines(image, representative_lines)
+#show_clusters(lines, labels)
 #show_lines(image, lines)
 #key_points = ORB(gray)
 #show_ORB(image, key_points)
