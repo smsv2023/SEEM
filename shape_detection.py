@@ -171,10 +171,16 @@ def line_distance(line1, line2):
     # Move the lines to the same x or y coordinate
     if abs(mid_x1 - mid_x2) < abs(mid_y1 - mid_y2):
         # Move to the same x coordinate
-        mid_x2 = mid_x1
+        dx = mid_x1 - mid_x2
+        x1_2 += dx
+        x2_2 += dx
+        mid_x2 += dx
     else:
         # Move to the same y coordinate
-        mid_y2 = mid_y1
+        dy = mid_y1 - mid_y2
+        y1_2 += dy
+        y2_2 += dy
+        mid_y2 += dy
 
     # Extend or shrink the second line to the same length as the first line
     scale = length1 / length2
