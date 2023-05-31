@@ -93,7 +93,7 @@ def cluster_lines(lines):
     labels = clustering.labels_
     return clustering
 
-def show_clusters(lines, labels):
+def show_clusters(image, lines, labels):
     # Create a list of colors for each cluster
     colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']    
     # Plot each line with color corresponding to its cluster
@@ -108,6 +108,7 @@ def show_clusters(lines, labels):
 
     # plt's origin is at left bottom, so flip it vertically
     plt.gca().invert_yaxis()
+    plt.imshow(image)
     plt.show()
 
 def find_representative_line(cluster_lines):
@@ -168,7 +169,7 @@ clustering = cluster_lines(lines)
 labels = clustering.labels_
 representative_lines=find_representative_lines(lines, labels)
 show_lines(image, representative_lines)
-#show_clusters(lines, labels)
+#show_clusters(image, lines, labels)
 #show_lines(image, lines)
 #key_points = ORB(gray)
 #show_ORB(image, key_points)
