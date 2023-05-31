@@ -151,7 +151,7 @@ def cluster_lines(lines):
     labels = clustering.labels_
     return clustering
 
-def show_clusters(lines, lables):
+def show_clusters(lines, labels):
     # Create a list of colors for each cluster
     colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']    
     # Plot each line with color corresponding to its cluster
@@ -202,7 +202,7 @@ lines = detect_line(gray)
 #show_lines(image, lines)
 clustering = cluster_lines(lines)
 lables = clustering.labels_
-show_clusters(lines, lables)
+show_clusters(lines, labels)
 #key_points = ORB(gray)
 #show_ORB(image, key_points)
 #edges=canny_detection(gray)
