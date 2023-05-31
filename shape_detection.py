@@ -152,64 +152,36 @@ def line_distance_intersect_axises(line1, line2):
     # Return the sum of the distances
     return np.sqrt(dx**2 + dy**2)
 
-# move the lines close along their orientation and make them same length before compare
+# minimize the distance between the centers of the two lines while keeping them parallel, 
+# which should give a better measure of their similarity.
+
 def line_distance(line1, line2):
-    # Unpack the endpoints of the lines
-    x1_1, y1_1, x2_1, y2_1 = line1
-    x1_2, y1_2, x2_2, y2_2 = line2
+    # Calculate the centers of the lines
+    center1 = np.array([(line1[0] + line1[2]) / 2, (line1[1] + line1[3]) / 2])
+    center2 = np.array([(line2[0] + line2[2]) / 2, (line2[1] + line2[3]) / 2])
 
-    # Calculate the lengths of the lines
-    length1 = np.sqrt((x2_1 - x1_1)**2 + (y2_1 - y1_1)**2)
-    length2 = np.sqrt((x2_2 - x1_2)**2 + (y2_2 - y1_2)**2)
-
-    # Calculate the midpoints of the lines
-    mid_x1 = (x1_1 + x2_1) / 2
-    mid_y1 = (y1_1 + y2_1) / 2
-    mid_x2 = (x1_2 + x2_2) / 2
-    mid_y2 = (y1_2 + y2_2) / 2
-    
     # Calculate the direction of the lines
-    dx1 = x2_1 - x1_1
-    dy1 = y2_1 - y1_1
-    dx2 = x2_2 - x1_2
-    dy2 = y2_2 - y1_2
+    direction1 = np.array([line1[2] - line1[0], line1[3] - line1[1]], dtype=float)
+    direction2 = np.array([line2[2] - line2[0], line2[3] - line2[1]], dtype=float)
 
+    # Normalize the directions
+    direction1 /= np.linalg.norm(direction1)
+    direction2 /= np.linalg.norm(direction2)
 
-    # Calculate the distance between the midpoints
-    dx_mid = mid_x1 - mid_x2
-    dy_mid = mid_y1 - mid_y2
-    distance_mid = np.sqrt(dx_mid**2 + dy_mid**2)
-    
-    # Move the second line along its direction to the same x or y coordinate as the first line
-    if abs(dx1) > abs(dy1):
-        # Move along the x direction
-        move_x = dx_mid / dx2 * dx1
-        x1_2 += move_x
-        x2_2 += move_x
-        mid_x2 += move_x
-    else:
-        # Move along the y direction
-        move_y = dy_mid / dy2 * dy1
-        y1_2 += move_y
-        y2_2 += move_y
-        mid_y2 += move_y
+    # Move the second line along its direction so that its center is closest to the first line's center
+    t = np.dot(center1 - center2, direction1) / np.dot(direction1, direction1)
+    center2_moved = center2 + t * direction1
 
-    # Extend or shrink the second line to the same length as the first line
-    scale = length1 / length2
-    x1_2 = mid_x2 + (x1_2 - mid_x2) * scale
-    y1_2 = mid_y2 + (y1_2 - mid_y2) * scale
-    x2_2 = mid_x2 + (x2_2 - mid_x2) * scale
-    y2_2 = mid_y2 + (y2_2 - mid_y2) * scale
+    # Calculate the distance between the centers of the lines and the difference in their direction
+    center_distance = np.linalg.norm(center1 - center2_moved)
+    cos_angle = np.dot(direction1, direction2)
+    cos_angle = np.clip(cos_angle, -1, 1)
+    direction_difference = np.arccos(cos_angle)
 
-    # Calculate the distances between the corresponding endpoints
-    dx1 = x1_1 - x1_2
-    dy1 = y1_1 - y1_2
-    dx2 = x2_1 - x2_2
-    dy2 = y2_1 - y2_2
+    # Combine the two distances into a single measure
+    distance = center_distance + direction_difference
 
-    # Return the sum of the distances
-    return np.sqrt(dx1**2 + dy1**2) + np.sqrt(dx2**2 + dy2**2)
-
+    return distance
 
 # use a clustering algorithm like DBSCAN, which can group together 
 # line segments that are close in terms of both distance and orientation. 
