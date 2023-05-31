@@ -106,7 +106,8 @@ def show_ORB(image, key_points):
 def cluster_lines(lines):
     # Create an array where each row represents a line segment
     # The columns could be the coordinates of the center point and the orientation
-    lines_array = np.array([[x_center, y_center, orientation] for line in lines])
+    lines_array = np.array([[(line[0][0]+line[0][2])/2, (line[0][1]+line[0][3])/2, np.arctan2(line[0][3]-line[0][1], line[0][2]-line[0][0])] for line in lines])
+    #lines_array = np.array([[x_center, y_center, orientation] for line in lines])
 
     # Apply DBSCAN
     clustering = DBSCAN(eps=0.3, min_samples=2).fit(lines_array)
