@@ -80,6 +80,12 @@ def line_distance(line1, line2, width, height):
 
     return distance
 
+# define decorator to be used by DBSCAN clustering
+def line_distance_decorator(width, height):
+    def line_distance_decorated(line1, line2):
+        return line_distance(line1, line2, width, height)
+    return line_distance_decorated
+
 # use a clustering algorithm like DBSCAN, which can group together 
 # line segments that are close in terms of both distance and orientation. 
 def cluster_lines(lines):
@@ -95,7 +101,12 @@ def cluster_lines(lines):
     #polar_lines = convert_to_polar_lines(lines)
     # default eps is 0.5, use 5 to get more clusters
     #clustering = DBSCAN(eps=5, min_samples=2, metric=hough_distance).fit(polar_lines)
-    clustering = DBSCAN(eps=5, min_samples=2, metric=line_distance).fit(lines)
+    #clustering = DBSCAN(eps=5, min_samples=2, metric=line_distance).fit(lines)
+    
+    # Decorate the line_distance function with the image width and height
+    line_distance_metric = line_distance_decorator(width, height)
+    # Use the decorated function as the metric function
+    clustering = DBSCAN(eps=1, min_samples=2, metric=line_distance_metric).fit(lines)
 
     # The labels_ attribute contains the cluster labels for each line segment
     labels = clustering.labels_
