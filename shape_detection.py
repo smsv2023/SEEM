@@ -297,9 +297,7 @@ folder ='/Users/seanmao/Pictures/SEEM/output/Test001'
 file = '10_dining table_cropped.png'
 image = cv2.imread(os.path.join(folder, file))
 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
 lines = detect_line(gray)
-
 clustering = cluster_lines(lines)
 labels = clustering.labels_
 representative_lines=find_representative_lines(lines, labels)
