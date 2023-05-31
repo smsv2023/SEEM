@@ -101,20 +101,55 @@ def show_ORB(image, key_points):
     # Display the image
     plt.imshow(image_with_key_points), plt.show()
 
+# convert lines with starting/ending points to lines in the polar coordinate system
+def convert_to_polar_lines(lines):
+    polar_lines = []
+    for line in lines:
+        x1, y1, x2, y2 = line[0]
+
+        # Calculate theta
+        theta = np.arctan2(y2 - y1, x2 - x1)
+
+        # Calculate rho
+        rho = x1 * np.cos(theta) + y1 * np.sin(theta)
+
+        polar_lines.append([rho, theta])
+
+    # Convert to numpy array for easier manipulation
+    polar_lines = np.array(polar_lines)   
+    return polar_lines
+
+# Define custom distance function
+def hough_distance(line1, line2):
+    rho1, theta1 = line1
+    rho2, theta2 = line2
+
+    # Calculate the difference in rho and theta
+    rho_diff = np.abs(rho1 - rho2)
+    theta_diff = np.abs(theta1 - theta2)
+
+    # Use some weighting scheme, for example:
+    return rho_diff + theta_diff
+
 # use a clustering algorithm like DBSCAN, which can group together 
 # line segments that are close in terms of both distance and orientation. 
 def cluster_lines(lines):
     # Create an array where each row represents a line segment
     # The columns could be the coordinates of the center point and the orientation
-    lines_array = np.array([[(line[0][0]+line[0][2])/2, (line[0][1]+line[0][3])/2, np.arctan2(line[0][3]-line[0][1], line[0][2]-line[0][0])] for line in lines])
+    # lines_array = np.array([[(line[0][0]+line[0][2])/2, (line[0][1]+line[0][3])/2, np.arctan2(line[0][3]-line[0][1], line[0][2]-line[0][0])] for line in lines])
+    
     #lines_array = np.array([[x_center, y_center, orientation] for line in lines])
 
     # Apply DBSCAN
-    clustering = DBSCAN(eps=0.3, min_samples=2).fit(lines_array)
+    #clustering = DBSCAN(eps=0.3, min_samples=2).fit(lines_array)
+    # use customer distance for the polar system lines
+    polar_lines = convert_to_polar_lines(lines)
+    clustering = DBSCAN(eps=0.5, min_samples=2, metric=hough_distance).fit(polar_lines)
 
     # The labels_ attribute contains the cluster labels for each line segment
     labels = clustering.labels_
     return clustering
+
 
 # fine lines nearly paralle
 # distance of lines can vary due to the pespective distortion
