@@ -221,6 +221,46 @@ def show_clusters(lines, labels):
     # plt's origin is at left bottom, so flip it vertically
     plt.gca().invert_yaxis()
     plt.show()
+
+def find_representative_lines(lines, labels):
+    # Initialize an empty list to hold the representative lines
+    representative_lines = []
+
+    # For each cluster label...
+    for label in set(labels):
+        # Get the lines in this cluster
+        cluster_lines = lines[labels == label]
+
+        # Compute the direction of the line
+        dx = np.mean(cluster_lines[:, 2] - cluster_lines[:, 0])
+        dy = np.mean(cluster_lines[:, 3] - cluster_lines[:, 1])
+
+        # Normalize the direction
+        length = np.sqrt(dx**2 + dy**2)
+        dx /= length
+        dy /= length
+
+        # Project the start and end points onto the direction
+        projections = cluster_lines[:, [0, 2]] * dx + cluster_lines[:, [1, 3]] * dy
+
+        # Find the minimum and maximum projections
+        min_proj = np.min(projections)
+        max_proj = np.max(projections)
+
+        # Compute the start and end points of the representative line
+        start = np.array([min_proj * dx, min_proj * dy])
+        end = np.array([max_proj * dx, max_proj * dy])
+
+        # Create a new line with these points
+        representative_line = np.concatenate([start, end])
+
+        # Add this line to the list of representative lines
+        representative_lines.append(representative_line)
+
+    # Convert the list to a numpy array
+    representative_lines = np.array(representative_lines)
+    return representative_lines
+    
     
 # fine lines nearly paralle
 # distance of lines can vary due to the pespective distortion
@@ -259,10 +299,11 @@ image = cv2.imread(os.path.join(folder, file))
 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
 lines = detect_line(gray)
-#show_lines(image, lines)
+
 clustering = cluster_lines(lines)
 labels = clustering.labels_
 show_clusters(lines, labels)
+#show_lines(image, lines)
 #key_points = ORB(gray)
 #show_ORB(image, key_points)
 #edges=canny_detection(gray)
