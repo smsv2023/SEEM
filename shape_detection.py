@@ -156,7 +156,7 @@ def show_clusters(lines, lables):
     colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']    
     # Plot each line with color corresponding to its cluster
     for i, line in enumerate(lines):
-        x1, y1, x2, y2 = line
+        x1, y1, x2, y2 = line[0]
         # Choose color based on cluster label
         color = colors[labels[i] % len(colors)]
         plt.plot((x1, x2), (y1, y2), color=color)
