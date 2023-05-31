@@ -33,7 +33,7 @@ def detect_line(gray):
 def show_lines(image, lines):
     # Draw the lines on the original image
     for line in lines:
-        x1, y1, x2, y2 = line[0]
+        x1, y1, x2, y2 = line
         cv2.line(image, (x1, y1), (x2, y2), (0, 0, 255), 2)
 
     # Show the image
