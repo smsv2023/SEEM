@@ -134,7 +134,7 @@ def hough_distance(line1, line2):
 
 # use distance between two lines could then be defined as the sum of the 
 # distances between the corresponding endpoints. 
-def line_distance(line1, line2):
+def line_distance_intersect_axises(line1, line2):
     # Unpack the endpoints of the lines
     x1_1, y1_1, x2_1, y2_1 = line1
     x1_2, y1_2, x2_2, y2_2 = line2
@@ -151,6 +151,47 @@ def line_distance(line1, line2):
 
     # Return the sum of the distances
     return np.sqrt(dx**2 + dy**2)
+
+# move the lines together and make them same length before compare
+def line_distance(line1, line2):
+    # Unpack the endpoints of the lines
+    x1_1, y1_1, x2_1, y2_1 = line1
+    x1_2, y1_2, x2_2, y2_2 = line2
+
+    # Calculate the lengths of the lines
+    length1 = np.sqrt((x2_1 - x1_1)**2 + (y2_1 - y1_1)**2)
+    length2 = np.sqrt((x2_2 - x1_2)**2 + (y2_2 - y1_2)**2)
+
+    # Calculate the midpoints of the lines
+    mid_x1 = (x1_1 + x2_1) / 2
+    mid_y1 = (y1_1 + y2_1) / 2
+    mid_x2 = (x1_2 + x2_2) / 2
+    mid_y2 = (y1_2 + y2_2) / 2
+
+    # Move the lines to the same x or y coordinate
+    if abs(mid_x1 - mid_x2) < abs(mid_y1 - mid_y2):
+        # Move to the same x coordinate
+        mid_x2 = mid_x1
+    else:
+        # Move to the same y coordinate
+        mid_y2 = mid_y1
+
+    # Extend or shrink the second line to the same length as the first line
+    scale = length1 / length2
+    x1_2 = mid_x2 + (x1_2 - mid_x2) * scale
+    y1_2 = mid_y2 + (y1_2 - mid_y2) * scale
+    x2_2 = mid_x2 + (x2_2 - mid_x2) * scale
+    y2_2 = mid_y2 + (y2_2 - mid_y2) * scale
+
+    # Calculate the distances between the corresponding endpoints
+    dx1 = x1_1 - x1_2
+    dy1 = y1_1 - y1_2
+    dx2 = x2_1 - x2_2
+    dy2 = y2_1 - y2_2
+
+    # Return the sum of the distances
+    return np.sqrt(dx1**2 + dy1**2) + np.sqrt(dx2**2 + dy2**2)
+
 
 # use a clustering algorithm like DBSCAN, which can group together 
 # line segments that are close in terms of both distance and orientation. 
