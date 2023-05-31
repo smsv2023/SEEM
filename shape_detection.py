@@ -160,6 +160,10 @@ def show_clusters(lines, labels):
         # Choose color based on cluster label
         color = colors[labels[i] % len(colors)]
         plt.plot((x1, x2), (y1, y2), color=color)
+        # Add text to indicate the cluster number
+        if labels[i] != -1:
+            plt.text(x1, y1, f'Cluster {labels[i]}', color=color)
+
     # plt's origin is at left bottom, so flip it vertically
     plt.gca().invert_yaxis()
     plt.show()
