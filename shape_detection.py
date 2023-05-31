@@ -73,7 +73,7 @@ def line_distance(line1, line2, width, height):
 
     # Define weights
     center_distance_weight = 0.5
-    direction_difference_weight = 0.5
+    direction_difference_weight = 1
     
     # Calculate final distance
     distance = center_distance_weight * center_distance_normalized + direction_difference_weight * direction_difference_normalized
@@ -106,7 +106,11 @@ def cluster_lines(lines):
     # Decorate the line_distance function with the image width and height
     line_distance_metric = line_distance_decorator(width, height)
     # Use the decorated function as the metric function
-    clustering = DBSCAN(eps=1, min_samples=2, metric=line_distance_metric).fit(lines)
+    # define eps:
+    max_center_distance = 10 # assume 4000 width for 4m object, 10 pixels is about 10mm
+    max_angle_distance = np.pi/180 # assume the angle difference is smaller than 1 degree, 
+    eps = max_center_distance/np.sqrt(width**2 + height**2) * 0.5 + max_angle_distance/np.pi
+    clustering = DBSCAN(eps, min_samples=2, metric=line_distance_metric).fit(lines)
 
     # The labels_ attribute contains the cluster labels for each line segment
     labels = clustering.labels_
