@@ -105,7 +105,7 @@ def show_ORB(image, key_points):
 def convert_to_polar_lines(lines):
     polar_lines = []
     for line in lines:
-        x1, y1, x2, y2 = line[0]
+        x1, y1, x2, y2 = line
 
         # Calculate theta
         theta = np.arctan2(y2 - y1, x2 - x1)
@@ -198,7 +198,6 @@ def cluster_lines(lines):
     #polar_lines = convert_to_polar_lines(lines)
     # default eps is 0.5, use 5 to get more clusters
     #clustering = DBSCAN(eps=5, min_samples=2, metric=hough_distance).fit(polar_lines)
-    lines = lines.reshape(-1, 4) # reshape if input is the lines with the shape of [X, 0, 4]    
     clustering = DBSCAN(eps=5, min_samples=2, metric=line_distance).fit(lines)
 
     # The labels_ attribute contains the cluster labels for each line segment
@@ -210,7 +209,7 @@ def show_clusters(lines, labels):
     colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']    
     # Plot each line with color corresponding to its cluster
     for i, line in enumerate(lines):
-        x1, y1, x2, y2 = line[0]
+        x1, y1, x2, y2 = line
         # Choose color based on cluster label
         color = colors[labels[i] % len(colors)]
         plt.plot((x1, x2), (y1, y2), color=color)
@@ -225,7 +224,6 @@ def show_clusters(lines, labels):
 def find_representative_lines(lines, labels):
     # Initialize an empty list to hold the representative lines
     representative_lines = []
-    lines = lines.reshape(-1, 4)
     # For each cluster label...
     for label in set(labels):
         # Get the lines in this cluster
@@ -298,6 +296,7 @@ file = '10_dining table_cropped.png'
 image = cv2.imread(os.path.join(folder, file))
 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 lines = detect_line(gray)
+lines = lines.reshape(-1, 4)
 clustering = cluster_lines(lines)
 labels = clustering.labels_
 representative_lines=find_representative_lines(lines, labels)
