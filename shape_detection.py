@@ -152,7 +152,7 @@ def line_distance_intersect_axises(line1, line2):
     # Return the sum of the distances
     return np.sqrt(dx**2 + dy**2)
 
-# move the lines together and make them same length before compare
+# move the lines close along their orientation and make them same length before compare
 def line_distance(line1, line2):
     # Unpack the endpoints of the lines
     x1_1, y1_1, x2_1, y2_1 = line1
@@ -167,20 +167,32 @@ def line_distance(line1, line2):
     mid_y1 = (y1_1 + y2_1) / 2
     mid_x2 = (x1_2 + x2_2) / 2
     mid_y2 = (y1_2 + y2_2) / 2
+    
+    # Calculate the direction of the lines
+    dx1 = x2_1 - x1_1
+    dy1 = y2_1 - y1_1
+    dx2 = x2_2 - x1_2
+    dy2 = y2_2 - y1_2
 
-    # Move the lines to the same x or y coordinate
-    if abs(mid_x1 - mid_x2) < abs(mid_y1 - mid_y2):
-        # Move to the same x coordinate
-        dx = mid_x1 - mid_x2
-        x1_2 += dx
-        x2_2 += dx
-        mid_x2 += dx
+
+    # Calculate the distance between the midpoints
+    dx_mid = mid_x1 - mid_x2
+    dy_mid = mid_y1 - mid_y2
+    distance_mid = np.sqrt(dx_mid**2 + dy_mid**2)
+    
+    # Move the second line along its direction to the same x or y coordinate as the first line
+    if abs(dx1) > abs(dy1):
+        # Move along the x direction
+        move_x = dx_mid / dx2 * dx1
+        x1_2 += move_x
+        x2_2 += move_x
+        mid_x2 += move_x
     else:
-        # Move to the same y coordinate
-        dy = mid_y1 - mid_y2
-        y1_2 += dy
-        y2_2 += dy
-        mid_y2 += dy
+        # Move along the y direction
+        move_y = dy_mid / dy2 * dy1
+        y1_2 += move_y
+        y2_2 += move_y
+        mid_y2 += move_y
 
     # Extend or shrink the second line to the same length as the first line
     scale = length1 / length2
