@@ -226,6 +226,7 @@ def cluster_lines(lines):
     #polar_lines = convert_to_polar_lines(lines)
     # default eps is 0.5, use 5 to get more clusters
     #clustering = DBSCAN(eps=5, min_samples=2, metric=hough_distance).fit(polar_lines)
+    lines = lines.reshape(-1, 4) # reshape if input is the lines with the shape of [X, 0, 4]    
     clustering = DBSCAN(eps=5, min_samples=2, metric=line_distance).fit(lines)
 
     # The labels_ attribute contains the cluster labels for each line segment
