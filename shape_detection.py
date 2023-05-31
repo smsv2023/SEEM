@@ -44,7 +44,7 @@ def show_lines(image, lines):
 # minimize the distance between the centers of the two lines while keeping them parallel, 
 # which should give a better measure of their similarity.
 
-def line_distance(line1, line2):
+def line_distance(line1, line2, width, height):
     # Calculate the centers of the lines
     center1 = np.array([(line1[0] + line1[2]) / 2, (line1[1] + line1[3]) / 2])
     center2 = np.array([(line2[0] + line2[2]) / 2, (line2[1] + line2[3]) / 2])
