@@ -81,6 +81,32 @@ def line_distance(line1, line2, width, height):
 
     return distance
 
+def line_to_center_direction(line):
+    center = np.array([(line[0] + line[2]) / 2, (line[1] + line[3]) / 2])  
+    direction = np.array([line[2] - line[0], line[3] - line[1]], dtype=float)
+    direction /= np.linalg.norm(direction)
+    return center, direction
+    
+def line_distance(line1, line2):
+    center1, direction1 = line_to_center_direction(line1)
+    center2, direction2 = line_to_center_direction(line2)
+
+    direction_difference = np.arccos(np.dot(direction1, direction2))
+    center_distance = np.linalg.norm(center2 - center1)
+
+    # Threshold for direction difference
+    direction_threshold = np.pi / 6  # 30 degrees
+
+    if direction_difference < direction_threshold:
+        # If the lines are roughly parallel, move line2 to be closer to line1
+        center2_moved = center2 + (center1 - center2) * direction2
+        center_distance_moved = np.linalg.norm(center2_moved - center1)
+        return center_distance_moved
+    else:
+        # If the lines are not parallel, return a large distance
+        return np.inf
+
+
 # define decorator to be used by DBSCAN clustering
 def line_distance_decorator(width, height):
     def line_distance_decorated(line1, line2):
