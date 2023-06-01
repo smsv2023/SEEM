@@ -26,8 +26,8 @@ def save_cropped_obj_mask(obj, image_array, output_path):
     cropped = image_array * np.expand_dims(dilated_mask_resized, axis=-1)
 
     # Save the mask and cropped image to files
-    cropped_image_path=os.path.join(output_path, os.path.splitext(basename)[0])
-    os.makedirs(cropped_image_path, exist_ok=True)
+    #cropped_image_path=os.path.join(output_path, os.path.splitext(basename)[0])
+    os.makedirs(output_path, exist_ok=True)
 
     obj_name = str(obj['id']) + "_" + COCO_PANOPTIC_CLASSES[obj['category_id']]
     print("saving object: %s..."%obj_name)
