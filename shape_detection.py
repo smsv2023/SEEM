@@ -52,9 +52,12 @@ def line_distance(line1, line2, width, height):
     center1, direction1 = line_to_center_direction(line1)
     center2, direction2 = line_to_center_direction(line2)
 
-    direction_difference = np.arccos(np.dot(direction1, direction2))
-    center_distance = np.linalg.norm(center2 - center1)
+    dot_product = np.dot(direction1, direction2)
+    dot_product = np.clip(dot_product, -1.0, 1.0)  # Clip to the range [-1, 1]
+    direction_difference = np.arccos(dot_product)
 
+    center_distance = np.linalg.norm(center2 - center1)
+    
     # Threshold for direction difference
     direction_threshold = np.pi / 180  # 1 degree
     
@@ -103,8 +106,7 @@ def cluster_lines(lines, width, height):
     # Use the decorated function as the metric function
     # define eps:
     max_center_distance = 10 # assume 4000 width for 4m object, 10 pixels is about 10mm
-    max_angle_distance = np.pi/180 # assume the angle difference is smaller than 1 degree, 
-    eps = max_center_distance/np.sqrt(width**2 + height**2) * 0.5 + max_angle_distance/np.pi
+    eps = max_center_distance/np.sqrt(width**2 + height**2)
     clustering = DBSCAN(eps, min_samples=2, metric=line_distance_metric).fit(lines)
 
     # The labels_ attribute contains the cluster labels for each line segment
