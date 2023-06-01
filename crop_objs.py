@@ -87,7 +87,7 @@ image_array = np.array(image)
 result_folder = '/Users/seanmao/Pictures/SEEM/output'
 pth_file = 'Test001_result.pth'
 # Load pano_seg tensor
-pano_seg = torch.load(os.path.join(result_folder,pth_file))
+pano_seg = torch.load(os.path.join(result_folder,pth_file), map_location=torch.device('cpu') )
 
 json_file = 'Test001_result.json'
 # Load pano_seg_info list of dictionaries
