@@ -33,10 +33,13 @@ def save_cropped_obj_mask(obj, image_array, output_path):
     obj_name = str(obj['id']) + "_" + COCO_PANOPTIC_CLASSES[obj['category_id']]
     print("saving object: %s..."%obj_name)
     mask_img = Image.fromarray(mask)
-    #mask_img.save(os.path.join(cropped_image_path, f"{obj['id']}_mask.png"))
-    mask_img.save(os.path.join(cropped_image_path, f"{obj_name}_mask.png"))
+    mask_img.save(os.path.join(output_path, f"{obj['id']}_{obj_name}_mask.png"))
+    
+    mask_img_resized = Image.fromarray(mask_resized)
+    mask_img_resized.save(os.path.join(output_path, f"obj['id']}_{obj_name}_mask_resized.png"))
+    
     cropped_img = Image.fromarray(cropped.astype(np.uint8))
-    cropped_img.save(os.path.join(cropped_image_path, f"{obj_name}_cropped.png"))        
+    cropped_img.save(os.path.join(output_path, f"obj['id']}_{obj_name}_cropped.png"))        
 
 # imageio has issues when access pfm create by MiDaS
 def save_cropped_depth_map(obj, depth_map):
