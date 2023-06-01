@@ -30,7 +30,7 @@ def detect_line(gray):
     lines = cv2.HoughLinesP(edges, 1, np.pi/180, 100, minLineLength=100, maxLineGap=10)
     return lines
 
-def show_lines_cv(image, lines):
+def show_lines(image, lines):
     color = 'b'
     # Plot each line with color
     for i, line in enumerate(lines):
