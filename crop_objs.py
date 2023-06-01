@@ -17,7 +17,7 @@ def save_cropped_obj_mask(obj, image_array, output_path):
 
     # Resize the mask to match the image_array dimensions
     #mask_resized = resize(mask, (image_array.shape[0], image_array.shape[1]))
-    nmask_resized = cv2.resize(mask, (depth_map.shape[1], depth_map.shape[0]), interpolation=cv2.INTER_NEAREST)
+    nmask_resized = cv2.resize(mask, (image_array.shape[1], image_array.shape[0]), interpolation=cv2.INTER_NEAREST)
 
     # Assuming 'mask' is your binary mask
     dilated_mask_resized = cv2.dilate(mask, cv2.getStructuringElement(cv2.MORPH_RECT, (5,5)))
