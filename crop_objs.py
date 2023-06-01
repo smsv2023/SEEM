@@ -6,6 +6,7 @@ import numpy as np
 import torch
 import os
 import cv2
+import json
 
 
 def save_cropped_obj_mask(obj, image_array, output_path):
