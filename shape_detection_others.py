@@ -2,6 +2,17 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 
+def show_lines_cv(image, lines):
+    # Draw the lines on the original image
+    for line in lines:
+        x1, y1, x2, y2 = line
+        cv2.line(image, (x1, y1), (x2, y2), (0, 0, 255), 2)
+
+    # Show the image
+    cv2.imshow('Image with lines', image)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+    
 # Sobel Edge Detection
 def sobel_detection(gray):
     # Blur the image for better edge detection
