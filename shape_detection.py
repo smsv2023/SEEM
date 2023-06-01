@@ -48,7 +48,7 @@ def line_to_center_direction(line):
     direction /= np.linalg.norm(direction)
     return center, direction
     
-def line_distance(line1, line2):
+def line_distance(line1, line2, width, height):
     center1, direction1 = line_to_center_direction(line1)
     center2, direction2 = line_to_center_direction(line2)
 
@@ -83,7 +83,7 @@ def line_distance_decorator(width, height):
 
 # use a clustering algorithm like DBSCAN, which can group together 
 # line segments that are close in terms of both distance and orientation. 
-def cluster_lines(lines):
+def cluster_lines(lines, width, height):
     # Create an array where each row represents a line segment
     # The columns could be the coordinates of the center point and the orientation
     # lines_array = np.array([[(line[0][0]+line[0][2])/2, (line[0][1]+line[0][3])/2, np.arctan2(line[0][3]-line[0][1], line[0][2]-line[0][0])] for line in lines])
@@ -183,7 +183,7 @@ image = cv2.imread(os.path.join(folder, file))
 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 lines = detect_line(gray)
 lines = lines.reshape(-1, 4)
-clustering = cluster_lines(lines)
+clustering = cluster_lines(lines, image.shape[1], image.shape[0])
 labels = clustering.labels_
 representative_lines=find_representative_lines(lines, labels)
 show_lines(image, representative_lines)
