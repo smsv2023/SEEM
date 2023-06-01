@@ -16,10 +16,10 @@ def save_cropped_obj_mask(obj, image_array):
     mask_resized = resize(mask, (image_array.shape[0], image_array.shape[1]))
 
     # Assuming 'mask' is your binary mask
-    dilated_mask = cv2.dilate(mask, cv2.getStructuringElement(cv2.MORPH_RECT, (5,5)))
+    dilated_mask_resized = cv2.dilate(mask, cv2.getStructuringElement(cv2.MORPH_RECT, (5,5)))
 
     # Crop the original image using the mask
-    cropped = image_array * np.expand_dims(mask_resized, axis=-1)
+    cropped = image_array * np.expand_dims(dilated_mask_resized, axis=-1)
 
     # Save the mask and cropped image to files
     cropped_image_path=os.path.join(output_path, os.path.splitext(basename)[0])
