@@ -2,6 +2,8 @@
 #from read_pfm import read_pfm
 #from write_pfm import write_pfm
 from PIL import Image
+import numpy as np
+import torch
 import os
 import cv2
 
@@ -80,9 +82,9 @@ image = Image.open(os.path.join(folder,file))
 # Convert the image to RGB mode
 image = image.convert("RGB")
 # Convert the image to a NumPy array
-image_array = np.array(test_image)
+image_array = np.array(image)
 
-result_folder = '/Users/seanmao/Pictures/SEEM/output/Test001/'
+result_folder = '/Users/seanmao/Pictures/SEEM/output'
 pth_file = 'Test001_result.pth'
 # Load pano_seg tensor
 pano_seg = torch.load(os.path.join(result_folder,pth_file))
@@ -96,6 +98,7 @@ with open(os.path.join(result_folder,json_file), 'r') as f:
 #depth_map_path = os.path.join(input_path_pfm, os.path.splitext(basename)[0]) + f"-dpt_swin2_large_384.pfm"
 #depth_map = read_pfm(depth_map_path)
 
+output_folder = os.path.join(result_folder, os.path.splitext(os.path.basename(file))[0]
 for obj in pano_seg_info:
     # For each object in pano_seg_info, create a mask and crop the original image
     print ("creating cropped object and mask files...")
