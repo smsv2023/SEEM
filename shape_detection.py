@@ -65,7 +65,9 @@ def line_distance(line1, line2, width, height):
 
     if direction_difference < direction_threshold:
         # If the lines are roughly parallel, move line2 to be closer to line1
-        center2_moved = center2 + (center1 - center2) * direction2
+        # Move the second line along its direction so that its center is closest to the first line's center
+        t = np.dot(center1 - center2, direction1) / np.dot(direction1, direction1)
+        center2_moved = center2 + t * direction1
         center_distance_moved = np.linalg.norm(center2_moved - center1)
         
         # Calculate the diagonal length of the image
