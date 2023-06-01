@@ -173,10 +173,13 @@ def find_representative_lines(lines, labels):
     for label in set(labels):
         # Get the lines in this cluster
         cluster_lines = lines[labels == label]
-        representative_line = find_representative_line(cluster_lines)
-
-        # Add this line to the list of representative lines
-        representative_lines.append(representative_line)
+        if label!=-1:
+            representative_line = find_representative_line(cluster_lines)
+            # Add this line to the list of representative lines
+            representative_lines.append(representative_line)
+        else:
+            for line in cluster_lines:
+                representative_lines.append(line)
 
     # Convert the list to a numpy array
     representative_lines = np.array(representative_lines)
