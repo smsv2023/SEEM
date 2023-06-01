@@ -41,45 +41,6 @@ def show_lines(image, lines):
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
-# minimize the distance between the centers of the two lines while keeping them parallel, 
-# which should give a better measure of their similarity.
-# problem: If the two lines have significantly different directions, then they are not on 
-# the same line, then moving the line doesn't make sense
-def line_distance(line1, line2, width, height):
-    # Calculate the centers of the lines
-    center1 = np.array([(line1[0] + line1[2]) / 2, (line1[1] + line1[3]) / 2])
-    center2 = np.array([(line2[0] + line2[2]) / 2, (line2[1] + line2[3]) / 2])
-
-    # Calculate the direction of the lines
-    direction1 = np.array([line1[2] - line1[0], line1[3] - line1[1]], dtype=float)
-    direction2 = np.array([line2[2] - line2[0], line2[3] - line2[1]], dtype=float)
-
-    # Normalize the directions
-    direction1 /= np.linalg.norm(direction1)
-    direction2 /= np.linalg.norm(direction2)
-
-    # Move the second line along its direction so that its center is closest to the first line's center
-    t = np.dot(center1 - center2, direction1) / np.dot(direction1, direction1)
-    center2_moved = center2 + t * direction1
-
-    # Calculate the distance between the centers of the lines and the difference in their direction
-    center_distance = np.linalg.norm(center1 - center2_moved)
-    cos_angle = np.dot(direction1, direction2)
-    cos_angle = np.clip(cos_angle, -1, 1)
-    direction_difference = np.arccos(cos_angle)
-
-    # Normalize center distance and direction difference
-    center_distance_normalized = center_distance / np.sqrt(width**2 + height**2)
-    direction_difference_normalized = direction_difference / np.pi
-
-    # Define weights
-    center_distance_weight = 0.5
-    direction_difference_weight = 1
-    
-    # Calculate final distance
-    distance = center_distance_weight * center_distance_normalized + direction_difference_weight * direction_difference_normalized
-
-    return distance
 
 def line_to_center_direction(line):
     center = np.array([(line[0] + line[2]) / 2, (line[1] + line[3]) / 2])  
