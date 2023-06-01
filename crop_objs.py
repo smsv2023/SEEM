@@ -1,4 +1,6 @@
 from skimage.transform import resize
+from read_pfm import read_pfm
+from write_pfm import write_pfm
 
 def save_cropped_obj_mask(obj, image_array):
     # Create a binary mask for this object
@@ -25,8 +27,6 @@ def save_cropped_obj_mask(obj, image_array):
     cropped_img.save(os.path.join(cropped_image_path, f"{obj_name}_cropped.png"))        
 
 # imageio has issues when access pfm create by MiDaS
-from read_pfm import read_pfm
-from write_pfm import write_pfm
 def save_cropped_depth_map(obj, depth_map):
     # Create a binary mask for this object
     print("crop depth map of object", obj['id'])
@@ -34,7 +34,6 @@ def save_cropped_depth_map(obj, depth_map):
     mask = (pano_seg == obj['id']).cpu().numpy().astype(np.uint8)
 
     # Resize the mask to match the depth_map dimensions
-    from skimage.transform import resize
     mask_resized = resize(mask, (depth_map.shape[0], depth_map.shape[1]))
     # binarize the mask again, value between 0 and 1 can be introduced when resizing
     mask_resized = (mask_resized > 0.5).astype(np.float32) 
@@ -63,3 +62,27 @@ def save_cropped_depth_map(obj, depth_map):
 
     # Save the isolated object depth map to a file
     write_pfm(isolated_object_depth_map_path, isolated_object_depth_map)
+    
+test_image=Image.open(test_image_file)
+# Convert the image to RGB mode
+test_image = test_image.convert("RGB")
+# Convert the image to a NumPy array
+image_array = np.array(test_image)
+
+# Load pano_seg tensor
+pano_seg = torch.load(output_pth_file)
+
+# Load pano_seg_info list of dictionaries
+with open(output_json_file, 'r') as f:
+    pano_seg_info = json.load(f)
+
+# if pfm
+depth_map_path = os.path.join(input_path_pfm, os.path.splitext(basename)[0]) + f"-dpt_swin2_large_384.pfm"
+depth_map = read_pfm(depth_map_path)
+
+for obj in pano_seg_info:
+    # For each object in pano_seg_info, create a mask and crop the original image
+    print ("creating cropped object and mask files...")
+    save_cropped_obj_mask(obj, image_array)
+    print ("creating cropped depth map...")
+    save_cropped_depth_map(obj, depth_map)    
