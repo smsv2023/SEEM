@@ -58,8 +58,6 @@ def line_distance(line1, line2, width, height):
     dot_product = np.dot(direction1, direction2)
     dot_product = np.clip(dot_product, -1.0, 1.0)  # Clip to the range [-1, 1]
     direction_difference = np.arccos(dot_product)
-
-    center_distance = np.linalg.norm(center2 - center1)
     
     # Threshold for direction difference
     direction_threshold = np.pi / 180  # 1 degree
@@ -78,6 +76,7 @@ def line_distance(line1, line2, width, height):
 
         return center_distance_moved_normalized
     else:
+        #center_distance = np.linalg.norm(center2 - center1)
         # If the lines are not parallel, return a large distance
         return np.inf
 
