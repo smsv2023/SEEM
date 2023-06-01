@@ -98,10 +98,10 @@ with open(os.path.join(result_folder,json_file), 'r') as f:
 #depth_map_path = os.path.join(input_path_pfm, os.path.splitext(basename)[0]) + f"-dpt_swin2_large_384.pfm"
 #depth_map = read_pfm(depth_map_path)
 
-output_folder = os.path.join(result_folder, os.path.splitext(os.path.basename(file))[0]
+output_folder = os.path.join(result_folder, os.path.splitext(os.path.basename(file))[0])
 for obj in pano_seg_info:
     # For each object in pano_seg_info, create a mask and crop the original image
     print ("creating cropped object and mask files...")
-    save_cropped_obj_mask(obj, image_array, result_folder)
+    save_cropped_obj_mask(obj, image_array, output_folder)
     #print ("creating cropped depth map...")
     #save_cropped_depth_map(obj, depth_map)    
