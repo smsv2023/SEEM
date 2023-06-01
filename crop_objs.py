@@ -1,6 +1,6 @@
 #from skimage.transform import resize
-from read_pfm import read_pfm
-from write_pfm import write_pfm
+#from read_pfm import read_pfm
+#from write_pfm import write_pfm
 from PIL import Image
 import os
 import cv2
@@ -75,10 +75,10 @@ def save_cropped_depth_map(obj, depth_map):
     write_pfm(isolated_object_depth_map_path, isolated_object_depth_map)
     
 folder = '/Users/seanmao/Pictures/SEEM/testset/'
-file= 'Test001.png'
-image=Image.open(os.path.join(folder,file))
+file = 'Test001.png'
+image = Image.open(os.path.join(folder,file))
 # Convert the image to RGB mode
-test_image = test_image.convert("RGB")
+image = image.convert("RGB")
 # Convert the image to a NumPy array
 image_array = np.array(test_image)
 
