@@ -43,7 +43,8 @@ def show_lines(image, lines):
 
 # minimize the distance between the centers of the two lines while keeping them parallel, 
 # which should give a better measure of their similarity.
-
+# problem: If the two lines have significantly different directions, then they are not on 
+# the same line, then moving the line doesn't make sense
 def line_distance(line1, line2, width, height):
     # Calculate the centers of the lines
     center1 = np.array([(line1[0] + line1[2]) / 2, (line1[1] + line1[3]) / 2])
