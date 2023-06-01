@@ -183,3 +183,10 @@ def line_distance(line1, line2, width, height):
     distance = center_distance_weight * center_distance_normalized + direction_difference_weight * direction_difference_normalized
 
     return distance
+
+# define decorator to be used by DBSCAN clustering
+def line_distance_decorator(width, height):
+    def line_distance_decorated(line1, line2):
+        return line_distance(line1, line2, width, height)
+    return line_distance_decorated
+
