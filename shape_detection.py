@@ -31,26 +31,14 @@ def detect_line(gray):
     return lines
 
 def show_lines_cv(image, lines):
-    # Draw the lines on the original image
-    for line in lines:
-        x1, y1, x2, y2 = line
-        cv2.line(image, (x1, y1), (x2, y2), (0, 0, 255), 2)
-
-    # Show the image
-    cv2.imshow('Image with lines', image)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-    # Create a list of colors for each cluster
-    colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']    
-    # Plot each line with color corresponding to its cluster
+    color = 'b'
+    # Plot each line with color
     for i, line in enumerate(lines):
         x1, y1, x2, y2 = line
         # Choose color based on cluster label
-        color = colors[labels[i] % len(colors)]
         plt.plot((x1, x2), (y1, y2), color=color)
         # Add text to indicate the cluster number
-        if labels[i] != -1:
-            plt.text(x1, y1, f'{labels[i]}', color=color)
+        plt.text(x1, y1, f'{i}', color=color)
 
     # plt's origin is at left bottom, so flip it vertically
     plt.gca().invert_yaxis()
