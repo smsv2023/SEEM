@@ -95,6 +95,6 @@ with open(os.path.join(result_folder,json_file), 'r') as f:
 for obj in pano_seg_info:
     # For each object in pano_seg_info, create a mask and crop the original image
     print ("creating cropped object and mask files...")
-    save_cropped_obj_mask(obj, image_array)
+    save_cropped_obj_mask(obj, image_array, result_folder)
     #print ("creating cropped depth map...")
     #save_cropped_depth_map(obj, depth_map)    
