@@ -105,7 +105,7 @@ def cluster_lines(lines, width, height):
     line_distance_metric = line_distance_decorator(width, height)
     # Use the decorated function as the metric function
     # define eps:
-    max_center_distance = 10 # assume 4000 width for 4m object, 10 pixels is about 10mm
+    max_center_distance = 20 # assume 4000 width for 4m object, 20 pixels is about 20mm
     eps = max_center_distance/np.sqrt(width**2 + height**2)
     clustering = DBSCAN(eps, min_samples=2, metric=line_distance_metric).fit(lines)
 
