@@ -95,7 +95,7 @@ def line_distance(line1, line2):
     center_distance = np.linalg.norm(center2 - center1)
 
     # Threshold for direction difference
-    direction_threshold = np.pi / 6  # 30 degrees
+    direction_threshold = np.pi / 180  # 30 degrees
 
     if direction_difference < direction_threshold:
         # If the lines are roughly parallel, move line2 to be closer to line1
