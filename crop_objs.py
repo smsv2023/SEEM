@@ -1,4 +1,4 @@
-from skimage.transform import resize
+#from skimage.transform import resize
 from read_pfm import read_pfm
 from write_pfm import write_pfm
 from PIL import Image
@@ -13,7 +13,8 @@ def save_cropped_obj_mask(obj, image_array, output_path):
     mask = (pano_seg == obj['id']).cpu().numpy().astype(np.uint8) * 255
 
     # Resize the mask to match the image_array dimensions
-    mask_resized = resize(mask, (image_array.shape[0], image_array.shape[1]))
+    #mask_resized = resize(mask, (image_array.shape[0], image_array.shape[1]))
+    nmask_resized = cv2.resize(mask, (depth_map.shape[1], depth_map.shape[0]), interpolation=cv2.INTER_NEAREST)
 
     # Assuming 'mask' is your binary mask
     dilated_mask_resized = cv2.dilate(mask, cv2.getStructuringElement(cv2.MORPH_RECT, (5,5)))
@@ -41,7 +42,10 @@ def save_cropped_depth_map(obj, depth_map):
     mask = (pano_seg == obj['id']).cpu().numpy().astype(np.uint8)
 
     # Resize the mask to match the depth_map dimensions
-    mask_resized = resize(mask, (depth_map.shape[0], depth_map.shape[1]))
+    #mask_resized = resize(mask, (depth_map.shape[0], depth_map.shape[1]))
+    
+    nmask_resized = cv2.resize(mask, (depth_map.shape[1], depth_map.shape[0]), interpolation=cv2.INTER_NEAREST)
+    
     # binarize the mask again, value between 0 and 1 can be introduced when resizing
     mask_resized = (mask_resized > 0.5).astype(np.float32) 
 
