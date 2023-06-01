@@ -30,7 +30,7 @@ def detect_line(gray):
     lines = cv2.HoughLinesP(edges, 1, np.pi/180, 100, minLineLength=100, maxLineGap=10)
     return lines
 
-def show_lines(image, lines):
+def show_lines_cv(image, lines):
     # Draw the lines on the original image
     for line in lines:
         x1, y1, x2, y2 = line
@@ -40,7 +40,22 @@ def show_lines(image, lines):
     cv2.imshow('Image with lines', image)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+    # Create a list of colors for each cluster
+    colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']    
+    # Plot each line with color corresponding to its cluster
+    for i, line in enumerate(lines):
+        x1, y1, x2, y2 = line
+        # Choose color based on cluster label
+        color = colors[labels[i] % len(colors)]
+        plt.plot((x1, x2), (y1, y2), color=color)
+        # Add text to indicate the cluster number
+        if labels[i] != -1:
+            plt.text(x1, y1, f'{labels[i]}', color=color)
 
+    # plt's origin is at left bottom, so flip it vertically
+    plt.gca().invert_yaxis()
+    plt.imshow(image)
+    plt.show()
 
 def line_to_center_direction(line):
     center = np.array([(line[0] + line[2]) / 2, (line[1] + line[3]) / 2])  
