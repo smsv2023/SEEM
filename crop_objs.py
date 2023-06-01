@@ -1,6 +1,8 @@
 from skimage.transform import resize
 from read_pfm import read_pfm
 from write_pfm import write_pfm
+from PIL import Image
+import os
 
 def save_cropped_obj_mask(obj, image_array):
     # Create a binary mask for this object
@@ -63,14 +65,18 @@ def save_cropped_depth_map(obj, depth_map):
     # Save the isolated object depth map to a file
     write_pfm(isolated_object_depth_map_path, isolated_object_depth_map)
     
-test_image=Image.open(test_image_file)
+folder = '/Users/seanmao/Pictures/SEEM/testset/'
+file= 'Test001.png'
+image=Image.open(os.path.join(folder,file))
 # Convert the image to RGB mode
 test_image = test_image.convert("RGB")
 # Convert the image to a NumPy array
 image_array = np.array(test_image)
 
+result_folder = '/Users/seanmao/Pictures/SEEM/output/Test001/'
+pth_file = 'Test001_result.pth'
 # Load pano_seg tensor
-pano_seg = torch.load(output_pth_file)
+pano_seg = torch.load(os.path.join(result_folder,pth_file))
 
 # Load pano_seg_info list of dictionaries
 with open(output_json_file, 'r') as f:
