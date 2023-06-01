@@ -6,7 +6,7 @@ import os
 import cv2
 
 
-def save_cropped_obj_mask(obj, image_array):
+def save_cropped_obj_mask(obj, image_array, output_path):
     # Create a binary mask for this object
     print("Crop object", obj['id'])
 
