@@ -3,6 +3,8 @@ from read_pfm import read_pfm
 from write_pfm import write_pfm
 from PIL import Image
 import os
+import cv2
+
 
 def save_cropped_obj_mask(obj, image_array):
     # Create a binary mask for this object
@@ -12,6 +14,9 @@ def save_cropped_obj_mask(obj, image_array):
 
     # Resize the mask to match the image_array dimensions
     mask_resized = resize(mask, (image_array.shape[0], image_array.shape[1]))
+
+    # Assuming 'mask' is your binary mask
+    dilated_mask = cv2.dilate(mask, cv2.getStructuringElement(cv2.MORPH_RECT, (5,5)))
 
     # Crop the original image using the mask
     cropped = image_array * np.expand_dims(mask_resized, axis=-1)
@@ -78,17 +83,18 @@ pth_file = 'Test001_result.pth'
 # Load pano_seg tensor
 pano_seg = torch.load(os.path.join(result_folder,pth_file))
 
+json_file = 'Test001_result.json'
 # Load pano_seg_info list of dictionaries
-with open(output_json_file, 'r') as f:
+with open(os.path.join(result_folder,json_file), 'r') as f:
     pano_seg_info = json.load(f)
 
 # if pfm
-depth_map_path = os.path.join(input_path_pfm, os.path.splitext(basename)[0]) + f"-dpt_swin2_large_384.pfm"
-depth_map = read_pfm(depth_map_path)
+#depth_map_path = os.path.join(input_path_pfm, os.path.splitext(basename)[0]) + f"-dpt_swin2_large_384.pfm"
+#depth_map = read_pfm(depth_map_path)
 
 for obj in pano_seg_info:
     # For each object in pano_seg_info, create a mask and crop the original image
     print ("creating cropped object and mask files...")
     save_cropped_obj_mask(obj, image_array)
-    print ("creating cropped depth map...")
-    save_cropped_depth_map(obj, depth_map)    
+    #print ("creating cropped depth map...")
+    #save_cropped_depth_map(obj, depth_map)    
