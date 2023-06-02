@@ -14,9 +14,15 @@ def find_mask_size(mask):
 
     # Stack x and y coordinates together
     coords = np.stack((x, y), axis=-1)
+    
+    # Compute the convex hull
+    hull = ConvexHull(coords)
+
+    # Get the coordinates of the hull vertices
+    hull_coords = coords[hull.vertices]
 
     # Compute pairwise distances
-    distances = pdist(coords)
+    distances = pdist(hull_coords)
 
     # Find the maximum distance
     max_distance = np.max(distances)    
@@ -295,7 +301,7 @@ file = '10_dining table_cropped.png'
 mask_file= '10_dining table_mask_resized.png'
 image = cv2.imread(os.path.join(folder, file))
 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-mask = cv2.imread(os.path.join(folder, mask_file))
+mask = cv2.imread(os.path.join(folder, mask_file), cv2.IMREAD_GRAYSCALE)
 lines = detect_line(gray)
 lines = lines.reshape(-1, 4)
 clustering = cluster_lines(lines, image.shape[1], image.shape[0])
