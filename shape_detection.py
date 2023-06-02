@@ -292,8 +292,10 @@ def filter_lines(lines, angle_threshold, length_threshold):
 # Load the image
 folder ='/Users/seanmao/Pictures/SEEM/output/Test001'
 file = '10_dining table_cropped.png'
+mask_file= '10_dining table_mask_resized.png'
 image = cv2.imread(os.path.join(folder, file))
 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+mask = cv2.imread(os.path.join(folder, mask_file))
 lines = detect_line(gray)
 lines = lines.reshape(-1, 4)
 clustering = cluster_lines(lines, image.shape[1], image.shape[0])
