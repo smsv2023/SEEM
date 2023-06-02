@@ -212,7 +212,7 @@ def lines_intersect(line1, line2):
 def find_edge_candidates(lines):
     orientations = find_orientations(lines)
     # Use DBSCAN to cluster the lines based on their orientations
-    dbscan = DBSCAN(eps=np.pi/8, min_samples=5).fit(orientations)  # adjust the parameters as needed
+    dbscan = DBSCAN(eps=np.pi/32, min_samples=5).fit(orientations)  # adjust the parameters as needed
     labels = dbscan.labels_
     
     # Compute the average orientation of each cluster
