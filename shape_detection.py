@@ -3,6 +3,7 @@ import numpy as np
 import os
 import matplotlib.pyplot as plt
 from sklearn.cluster import DBSCAN
+from sklearn.metrics import pairwise_distances_argmin_min
 
 def canny_detection(gray):
     # Perform Canny edge detection
