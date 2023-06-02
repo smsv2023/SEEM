@@ -14,14 +14,14 @@ def save_cropped_obj_mask(obj, image_array, output_path):
     # Create a binary mask for this object
     print("Crop object", obj['id'])
 
-    mask = (pano_seg == obj['id']).cpu().numpy().astype(np.uint8) * 255
+    mask = (pano_seg == obj['id']).cpu().numpy().astype(np.uint8)
 
     # Resize the mask to match the image_array dimensions
     #mask_resized = resize(mask, (image_array.shape[0], image_array.shape[1]))
     mask_resized = cv2.resize(mask, (image_array.shape[1], image_array.shape[0]), interpolation=cv2.INTER_NEAREST)
 
     # Assuming 'mask' is your binary mask
-    dilated_mask_resized = cv2.dilate(mask_resized, cv2.getStructuringElement(cv2.MORPH_RECT, (5,5)))
+    dilated_mask_resized = cv2.dilate(mask_resized, cv2.getStructuringElement(cv2.MORPH_RECT, (25,25)))
 
     # Crop the original image using the mask
     cropped = image_array * np.expand_dims(dilated_mask_resized, axis=-1)
