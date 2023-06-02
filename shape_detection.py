@@ -194,7 +194,7 @@ def find_orientations(lines):
     return orientations
 
 
-def pick_candiate_groups(lines):
+def find_edge_candidates(lines):
     orientations = find_orientations(lines)
     # Use DBSCAN to cluster the lines based on their orientations
     dbscan = DBSCAN(eps=np.pi/8, min_samples=5).fit(orientations)  # adjust the parameters as needed
