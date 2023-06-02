@@ -8,7 +8,7 @@ from shapely.geometry import LineString
 from scipy.spatial.distance import pdist
 
 # find out the longest distance of two pixels in the masked area
-def mask_size(mask):
+def find_mask_size(mask):
     # Assuming 'mask' is your binary mask image where object pixels are 1
     y, x = np.where(mask == 1)
 
