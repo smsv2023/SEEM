@@ -253,6 +253,7 @@ def find_edge_candidates(lines):
     top_clusters = np.argsort(ratings)[-2:]
     return top_clusters
 
+# not finished yet
 def filter_lines(lines, angle_threshold, length_threshold):
     filtered_lines = []
     for line in lines:
