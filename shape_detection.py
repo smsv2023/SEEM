@@ -4,6 +4,7 @@ import os
 import matplotlib.pyplot as plt
 from sklearn.cluster import DBSCAN
 from sklearn.metrics import pairwise_distances_argmin_min
+from shapely.geometry import LineString
 
 def canny_detection(gray):
     # Perform Canny edge detection
@@ -194,7 +195,20 @@ def find_orientations(lines):
     orientations = np.arctan2(dy, dx).reshape(-1, 1)
     return orientations
 
-
+# checks if two lines intersect, and return the distance of end points to the intersection
+def lines_intersect(line1, line2):
+    line1_geom = LineString([(line1[0], line1[1]), (line1[2], line1[3])])
+    line2_geom = LineString([(line2[0], line2[1]), (line2[2], line2[3])])
+    intersection = line1_geom.intersection(line2_geom)
+    if intersection.is_empty:
+        return np.inf
+    intersection_point = np.array([intersection.x, intersection.y])
+    #distances1 = np.sqrt((group_lines_i[:, [0, 2]] - intersection_point[0])**2 + (group_lines_i[:, [1, 3]] - intersection_point[1])**2)
+    #distances2 = np.sqrt((group_lines_j[:, [0, 2]] - intersection_point[0])**2 + (group_lines_j[:, [1, 3]] - intersection_point[1])**2)
+    distances1 = np.sqrt((line1[0, 2] - intersection_point[0])**2 + (line1[1, 3] - intersection_point[1])**2)
+    distances2 = np.sqrt((line2[0, 2] - intersection_point[0])**2 + (line2[1, 3] - intersection_point[1])**2)
+    return distances1, distances2
+    
 def find_edge_candidates(lines):
     orientations = find_orientations(lines)
     # Use DBSCAN to cluster the lines based on their orientations
@@ -225,7 +239,16 @@ def find_edge_candidates(lines):
 
         # Criterion 4: Contains lines with starting/ending points close to starting/ending points of other high rating cluster
         # You'll need to implement this part based on your specific requirements
-
+        for j in clusters:
+            if i < j:
+                group_lines_j = lines[labels == j]
+                for line_i in group_lines:
+                    for line_j in group_lines_j:
+                        distances1, distances2 = lines_intersect(line_i, line_j)
+                        if np.any(distances_i < 10) and np.any(distances_j < 10):  # adjust the threshold as needed
+                            ratings[i] += 1
+                            ratings[j] += 1
+                            
     # Select the top 2 rated clusters
     top_clusters = np.argsort(ratings)[-2:]
     return top_clusters
