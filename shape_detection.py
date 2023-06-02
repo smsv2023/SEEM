@@ -193,12 +193,42 @@ def find_orientations(lines):
     orientations = np.arctan2(dy, dx).reshape(-1, 1)
     return orientations
 
-def group_line_orientation(orientations)
-    from sklearn.cluster import KMeans
-    kmeans = KMeans(n_clusters=2, random_state=0).fit(orientations)
-    labels = kmeans.labels_
-    return lables
+
+def pick_candiate_groups(lines):
+    orientations = find_orientations(lines)
+    # Use DBSCAN to cluster the lines based on their orientations
+    dbscan = DBSCAN(eps=np.pi/8, min_samples=5).fit(orientations)  # adjust the parameters as needed
+    labels = dbscan.labels_
     
+    # Compute the average orientation of each cluster
+    clusters = np.unique(labels)
+    avg_orientations = np.array([orientations[labels == i].mean() for i in clusters])
+    
+    # Step 2: Rating Clusters
+    ratings = np.zeros(len(clusters))
+    for i in clusters:
+        # Criterion 1: Contains more long lines
+        group_lines = lines[labels == i]
+        group_lengths = np.sqrt((group_lines[:, 2] - group_lines[:, 0])**2 + (group_lines[:, 3] - group_lines[:, 1])**2)
+        ratings[i] += group_lengths.sum()
+
+        # Criterion 2: More perpendicular to any high rating other groups
+        diff = np.abs(avg_orientations[i] - avg_orientations)
+        diff = np.min(diff, np.pi - diff)
+        ratings[i] += np.sum(diff > np.pi/2 - np.pi/8)  # adjust the tolerance as needed
+
+        # Criterion 3: Long line are more close the edge of the bounding box of the line cluster
+        bbox = np.vstack([group_lines[:, :2], group_lines[:, 2:]]).min(axis=0), np.vstack([group_lines[:, :2], group_lines[:, 2:]]).max(axis=0)
+        distances, _ = pairwise_distances_argmin_min(group_lines.reshape(-1, 2), np.array(bbox))
+        ratings[i] += np.sum(distances < 10)  # adjust the threshold as needed
+
+        # Criterion 4: Contains lines with starting/ending points close to starting/ending points of other high rating cluster
+        # You'll need to implement this part based on your specific requirements
+
+    # Select the top 2 rated clusters
+    top_clusters = np.argsort(ratings)[-2:]
+    return top_clusters
+
 def filter_lines(lines, angle_threshold, length_threshold):
     filtered_lines = []
     for line in lines:
