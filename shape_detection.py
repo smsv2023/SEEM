@@ -29,7 +29,7 @@ def detect_line(gray):
     #edges = cv2.Canny(image=img_blur, threshold1=100, threshold2=200) # Canny Edge Detection
     
     # Perform Probabilistic Hough Transform
-    lines = cv2.HoughLinesP(edges, 1, np.pi/180, 100, minLineLength=100, maxLineGap=10)
+    lines = cv2.HoughLinesP(edges, 1, np.pi/180, 50, minLineLength=100, maxLineGap=10)
     return lines
 
 def show_lines(image, lines):
