@@ -185,6 +185,38 @@ def find_representative_lines(lines, labels):
     representative_lines = np.array(representative_lines)
     return representative_lines
    
+def find_orientations(lines):
+    # Compute the orientations of the lines
+    lines = np.array(lines)  # shape: [n_lines, 4]
+    dx = lines[:, 2] - lines[:, 0]
+    dy = lines[:, 3] - lines[:, 1]
+    orientations = np.arctan2(dy, dx).reshape(-1, 1)
+    return orientations
+
+def group_line_orientation(orientations)
+    from sklearn.cluster import KMeans
+    kmeans = KMeans(n_clusters=2, random_state=0).fit(orientations)
+    labels = kmeans.labels_
+    return lables
+    
+def filter_lines(lines, angle_threshold, length_threshold):
+    filtered_lines = []
+    for line in lines:
+        x1, y1, x2, y2 = line[0]
+
+        # Calculate the angle of the line to the vertical
+        angle = np.arctan2(y2 - y1, x2 - x1) * 180. / np.pi
+        if angle < 0:
+            angle += 180
+
+        # Calculate the length of the line
+        length = np.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+
+        # Apply the thresholds
+        if abs(angle - 90) <= angle_threshold and length >= length_threshold:
+            filtered_lines.append(line)
+
+    return filtered_lines
         
 # Load the image
 folder ='/Users/seanmao/Pictures/SEEM/output/Test001'
