@@ -5,6 +5,22 @@ import matplotlib.pyplot as plt
 from sklearn.cluster import DBSCAN
 from sklearn.metrics import pairwise_distances_argmin_min
 from shapely.geometry import LineString
+from scipy.spatial.distance import pdist
+
+# find out the longest distance of two pixels in the masked area
+def mask_size(mask):
+    # Assuming 'mask' is your binary mask image where object pixels are 1
+    y, x = np.where(mask == 1)
+
+    # Stack x and y coordinates together
+    coords = np.stack((x, y), axis=-1)
+
+    # Compute pairwise distances
+    distances = pdist(coords)
+
+    # Find the maximum distance
+    max_distance = np.max(distances)    
+    return max_distance
 
 def canny_detection(gray):
     # Perform Canny edge detection
