@@ -232,7 +232,8 @@ def lines_intersect(line1, line2):
     distances2 = np.sqrt((line2[0, 2] - intersection_point[0])**2 + (line2[1, 3] - intersection_point[1])**2)
     return distances1, distances2
 
-    
+
+# cluster lines by orientation, and then find the top clusters for table edges, and table leg
 def find_top_clusters(lines, angle_threshold=5, length_threshold=100, close_threshold=20):
     orientations = find_orientations(lines)
 
@@ -309,6 +310,8 @@ def find_top_clusters(lines, angle_threshold=5, length_threshold=100, close_thre
     # top_clusters = np.argsort(ratings)[-2:]
     return top_clusters, vertical_clusters[0]
 
+# find the top lines in the top clusters
+# not finished
 def rate_lines(lines, clusters, top_clusters, vertical_cluster, close_threshold=20, length_threshold=100):
     ratings = np.zeros(len(lines))
     for i in range(len(lines)):
