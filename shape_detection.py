@@ -232,7 +232,7 @@ def lines_intersect(line1, line2):
     distances2 = np.sqrt((line2[0, 2] - intersection_point[0])**2 + (line2[1, 3] - intersection_point[1])**2)
     return distances1, distances2
     
-def find_edge_candidates(lines, angle_threshold=5, length_threshold=100, close_threshold=20):
+def find_top_clusters(lines, angle_threshold=5, length_threshold=100, close_threshold=20):
     orientations = find_orientations(lines)
 
     # Use DBSCAN to cluster the lines based on their orientations
@@ -251,13 +251,7 @@ def find_edge_candidates(lines, angle_threshold=5, length_threshold=100, close_t
         long_lines = group_lines[lengths > length_threshold]  # adjust the threshold as needed
         ratings[i] += 1 if lenth(long_lines)>0 else 0
 
-        # Criterion 2: More perpendicular to any high rating other groups
-        # It doesn't hold due to the perspective distortion
-        # diff = np.abs(avg_orientations[i] - avg_orientations)
-        # diff = np.min(diff, np.pi - diff)
-        # ratings[i] += np.sum(diff > np.pi/2 - np.pi/8)  # adjust the tolerance as needed
-
-        # Criterion 3: Long line are more close the edge of the convex hull of the line cluster
+        # Criterion 2: line closer the edge of the convex hull of the line cluster
         for i in clusters:
             group_lines = lines[labels == i]
             group_points = group_lines.reshape(-1, 2)
@@ -269,7 +263,7 @@ def find_edge_candidates(lines, angle_threshold=5, length_threshold=100, close_t
                 if min_distance < close_threshold:  # adjust the threshold as needed
                     ratings[i] += 1
 
-        # Criterion 4: Contains lines with starting/ending points close to starting/ending points of other high rating cluster
+        # Criterion 3: Contains lines with starting/ending points close to starting/ending points of other high rating cluster
         # You'll need to implement this part based on your specific requirements
         for j in clusters:
             if i < j:
@@ -290,9 +284,10 @@ def find_edge_candidates(lines, angle_threshold=5, length_threshold=100, close_t
         group_lines = lines[labels == i]
         angles = np.abs(np.arctan2(group_lines[:,3] - group_lines[:,1], group_lines[:,2] - group_lines[:,0]))
         median_angle = np.median(angles)
-        if np.abs(np.pi/2 - median_angle) > np.pi/(180/angle_threshold):  # angle_threshold is 5 degree by default
+        if np.abs(np.pi/2 - median_angle) < np.pi/(180/angle_threshold):  # angle_threshold is 5 degree by default
             horizontal_clusters.append(i)
-
+    vertical_clusters = [i for i in sorted_clusters if i not in horizontal_clusters]
+            
     # Ensure top two clusters have different orientations
     top_clusters = []
     for i in horizontal_clusters:
@@ -312,7 +307,7 @@ def find_edge_candidates(lines, angle_threshold=5, length_threshold=100, close_t
             
     # Select the top 2 rated clusters
     # top_clusters = np.argsort(ratings)[-2:]
-    return top_clusters
+    return top_clusters, vertical_clusters[0]
 
 # for each cluster, find the upper/lower most lines
 # the upper most lines will be the candiate edge of the further sides
