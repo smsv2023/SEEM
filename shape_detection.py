@@ -233,29 +233,14 @@ def lines_intersect(line1, line2):
     return distances1, distances2
     
 def find_edge_candidates(lines, angle_threshold=5, length_threshold=100, close_threshold=20):
-    #orientations = find_orientations(lines)
-    vertical_clusters = np.where(abs(orientations) > np.pi/36)[0] # threshold is 5 degree 
+    orientations = find_orientations(lines)
 
     # Use DBSCAN to cluster the lines based on their orientations
     dbscan = DBSCAN(eps=np.pi/32, min_samples=5).fit(orientations)  # adjust the parameters as needed
     labels = dbscan.labels_
     
-    # Compute the average orientation of each cluster
-    clusters = np.unique(labels)
-    #avg_orientations = np.array([orientations[labels == i].mean() for i in clusters])
-    
-    # Exclude clusters with vertical orientation
-    vertical_clusters = []
-    for i in clusters:
-        group_lines = lines[labels == i]
-        angles = np.abs(np.arctan2(group_lines[:,3] - group_lines[:,1], group_lines[:,2] - group_lines[:,0]))
-        median_angle = np.median(angles)
-        if np.abs(np.pi/2 - median_angle) < np.pi/(180/angle_threshold):  # threshold is 5 degree
-            vertical_clusters.append(i)
-    
-    non_vertical_clusters = [i for i in clusters if i not in vertical_clusters]
-        
     # Step 2: Rating Clusters
+    clusters = np.unique(labels)        
     ratings = np.zeros(len(clusters))
     for i in clusters:
         # Criterion 1: Contains long lines
@@ -295,9 +280,38 @@ def find_edge_candidates(lines, angle_threshold=5, length_threshold=100, close_t
                         if np.any(distances_i < 10) and np.any(distances_j < close_threshold):  # adjust the threshold as needed
                             ratings[i] += 1
                             ratings[j] += 1
-                            
+
+    # Get the indices of the clusters sorted by their ratings
+    sorted_clusters = np.argsort(ratings)[::-1]
+
+    # Exclude clusters with vertical orientation
+    horizontal_clusters = []
+    for i in sorted_clusters:
+        group_lines = lines[labels == i]
+        angles = np.abs(np.arctan2(group_lines[:,3] - group_lines[:,1], group_lines[:,2] - group_lines[:,0]))
+        median_angle = np.median(angles)
+        if np.abs(np.pi/2 - median_angle) > np.pi/(180/angle_threshold):  # angle_threshold is 5 degree by default
+            horizontal_clusters.append(i)
+
+    # Ensure top two clusters have different orientations
+    top_clusters = []
+    for i in horizontal_clusters:
+        if len(top_clusters) == 0:
+            top_clusters.append(i)
+        else:
+            group1_lines = lines[labels == top_clusters[0]]
+            group2_lines = lines[labels == i]
+            angles1 = np.abs(np.arctan2(group1_lines[:,3] - group1_lines[:,1], group1_lines[:,2] - group1_lines[:,0]))
+            angles2 = np.abs(np.arctan2(group2_lines[:,3] - group2_lines[:,1], group2_lines[:,2] - group2_lines[:,0]))
+            median_angle1 = np.median(angles1)
+            median_angle2 = np.median(angles2)
+            if np.abs(median_angle1 - median_angle2) > np.pi/6:  # adjust the threshold as needed
+                top_clusters.append(i)
+        if len(top_clusters) == 2:
+            break
+            
     # Select the top 2 rated clusters
-    top_clusters = np.argsort(ratings)[-2:]
+    # top_clusters = np.argsort(ratings)[-2:]
     return top_clusters
 
 # for each cluster, find the upper/lower most lines
