@@ -5,8 +5,10 @@ import matplotlib.pyplot as plt
 from sklearn.cluster import DBSCAN
 from sklearn.metrics import pairwise_distances_argmin_min
 from shapely.geometry import LineString
+from shapely.geometry import Polygon
 from scipy.spatial.distance import pdist
 from scipy.spatial import ConvexHull
+
 
 # find out the longest distance of two pixels in the masked area
 def find_mask_size(mask):
@@ -160,7 +162,10 @@ def show_clusters(image, lines, labels):
     plt.gca().invert_yaxis()
     plt.imshow(image)
     plt.show()
+    
 
+# assuming the line segments are with the same direction and on the same line
+# for line segments on the same line, connect them to a single line
 def find_representative_line(cluster_lines):
     # Compute the direction of the line
     dx = np.mean(cluster_lines[:, 2] - cluster_lines[:, 0])
@@ -185,11 +190,12 @@ def find_representative_line(cluster_lines):
     start = np.round(mean_point + np.array([min_proj * dx, min_proj * dy])).astype(int)
     end = np.round(mean_point + np.array([max_proj * dx, max_proj * dy])).astype(int)
 
-
     # Create a new line with these points
     representative_line = np.concatenate([start, end])    
     return representative_line
 
+# assuming each cluster contains the line segments with the same direction and on the same line
+# find the representative lines (connected line segments) of all the clusters
 def find_representative_lines(lines, labels):
     # Initialize an empty list to hold the representative lines
     representative_lines = []
@@ -250,7 +256,7 @@ def find_top_clusters(lines, angle_threshold=5, length_threshold=100, close_thre
         # Compute the length of each line
         group_lengths = np.sqrt((group_lines[:, 0] - group_lines[:, 2])**2 + (group_lines[:, 1] - group_lines[:, 3])**2)
         # Only consider lines that are long enough
-        long_lines = group_lines[lengths > length_threshold]  # adjust the threshold as needed
+        long_lines = group_lines[group_lengths > length_threshold]  # adjust the threshold as needed
         ratings[i] += 1 if len(long_lines)>0 else 0
 
         # Criterion 2: line closer the edge of the convex hull of the line cluster
@@ -474,7 +480,7 @@ labels = clustering.labels_
 representative_lines=find_representative_lines(lines, labels)
 #show_lines(image, representative_lines)
 # find top clusters for table edges and leg candidates:
-edge_clusters, leg_cluster = find_top_clusters(lines, angle_threshold=5, length_threshold=100, close_threshold=20)
+edge_clusters, leg_cluster = find_top_clusters(representative_lines, angle_threshold=5, length_threshold=100, close_threshold=20)
 #show_clusters(image, lines, edge_clusters[0])
 
 #show_clusters(image, lines, labels)
