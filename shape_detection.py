@@ -238,17 +238,8 @@ def lines_intersect(line1, line2):
     distances2 = np.sqrt((line2[0, 2] - intersection_point[0])**2 + (line2[1, 3] - intersection_point[1])**2)
     return distances1, distances2
 
-
-# cluster lines by orientation, and then find the top clusters for table edges, and table leg
-def find_top_clusters(lines, angle_threshold=5, length_threshold=500, close_threshold=20):
-    orientations = find_orientations(lines)
-
-    # Use DBSCAN to cluster the lines based on their orientations
-    # double the angle_threshold as sides of table top may have big orientation difference    
-    dbscan = DBSCAN(eps=np.pi/(180/(1.5*angle_threshold)), min_samples=5).fit(orientations)  # adjust the parameters as needed
-    labels = dbscan.labels_
-    
-    # Step 2: Rating Clusters
+#helper function for find_top_clusters
+def _rate_clusters(lines, labels, angle_threshold=5, length_threshold=500, close_threshold=20):
     clusters = np.unique(labels)        
     ratings = np.zeros(len(clusters))
     for i in clusters:
@@ -288,7 +279,19 @@ def find_top_clusters(lines, angle_threshold=5, length_threshold=500, close_thre
 
     # Get the indices of the clusters sorted by their ratings
     sorted_clusters = np.argsort(ratings)[::-1]
+    return sorted_clusters
+# cluster lines by orientation, and then find the top clusters for table edges, and table leg
+def find_top_clusters(lines, angle_threshold=5, length_threshold=500, close_threshold=20):
+    orientations = find_orientations(lines)
 
+    # Use DBSCAN to cluster the lines based on their orientations
+    # double the angle_threshold as sides of table top may have big orientation difference    
+    dbscan = DBSCAN(eps=np.pi/(180/(1.5*angle_threshold)), min_samples=5).fit(orientations)  # adjust the parameters as needed
+    labels = dbscan.labels_
+    
+    # Step 2: Rating Clusters
+    sorted_clusters = _rate_clusters(lines, labels, angle_threshold, length_threshold, close_threshold)
+    
     # Exclude clusters with vertical orientation
     horizontal_clusters = []
     for i in sorted_clusters:
@@ -318,7 +321,7 @@ def find_top_clusters(lines, angle_threshold=5, length_threshold=500, close_thre
             
     # Select the top 2 rated clusters
     # top_clusters = np.argsort(ratings)[-2:]
-    return top_clusters, vertical_clusters[0]
+    return labels, top_clusters.reshape(-1,1), vertical_clusters[0]
 
 # find the top lines in the top clusters
 # not finished
