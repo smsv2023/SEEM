@@ -240,17 +240,20 @@ def lines_intersect(line1, line2):
 
 
 # cluster lines by orientation, and then find the top clusters for table edges, and table leg
-def find_top_clusters(lines, angle_threshold=5, length_threshold=100, close_threshold=20):
+def find_top_clusters(lines, angle_threshold=5, length_threshold=500, close_threshold=20):
     orientations = find_orientations(lines)
 
     # Use DBSCAN to cluster the lines based on their orientations
-    dbscan = DBSCAN(eps=np.pi/(180/angle_threshold), min_samples=5).fit(orientations)  # adjust the parameters as needed
+    # double the angle_threshold as sides of table top may have big orientation difference    
+    dbscan = DBSCAN(eps=np.pi/(180/(1.5*angle_threshold)), min_samples=5).fit(orientations)  # adjust the parameters as needed
     labels = dbscan.labels_
     
     # Step 2: Rating Clusters
     clusters = np.unique(labels)        
     ratings = np.zeros(len(clusters))
     for i in clusters:
+        if i!=-1:
+            break
         # Criterion 1: Contains long lines
         group_lines = lines[labels == i]
         # Compute the length of each line
@@ -259,17 +262,18 @@ def find_top_clusters(lines, angle_threshold=5, length_threshold=100, close_thre
         long_lines = group_lines[group_lengths > length_threshold]  # adjust the threshold as needed
         ratings[i] += 1 if len(long_lines)>0 else 0
 
-        # Criterion 2: line closer the edge of the convex hull of the line cluster
+        # Criterion 2: line closer the edge of the convex hull of the all-line cluster
         for i in clusters:
             group_lines = lines[labels == i]
-            group_points = group_lines.reshape(-1, 2)
-            hull = ConvexHull(group_points)
-            hull_polygon = Polygon(group_points[hull.vertices])
+            all_points = lines.reshape(-1, 2)
+            hull = ConvexHull(all_points)
+            hull_polygon = Polygon(all_points[hull.vertices])
             for line in group_lines:
                 line_geom = LineString([(line[0], line[1]), (line[2], line[3])])
                 min_distance = hull_polygon.boundary.distance(line_geom)
                 if min_distance < close_threshold:  # adjust the threshold as needed
                     ratings[i] += 1
+                    break
 
         # Criterion 3: Contains lines with starting/ending points close to starting/ending points of other high rating cluster
         for j in clusters:
