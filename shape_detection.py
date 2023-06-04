@@ -468,10 +468,15 @@ gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 mask = cv2.imread(os.path.join(folder, mask_file), cv2.IMREAD_GRAYSCALE)
 lines = detect_line(gray)
 lines = lines.reshape(-1, 4)
+# connect line segments on the same line
 clustering = cluster_lines(lines, image.shape[1], image.shape[0])
 labels = clustering.labels_
 representative_lines=find_representative_lines(lines, labels)
-show_lines(image, representative_lines)
+#show_lines(image, representative_lines)
+# find top clusters for table edges and leg candidates:
+edge_clusters, leg_cluster = find_top_clusters(lines, angle_threshold=5, length_threshold=100, close_threshold=20)
+#show_clusters(image, lines, edge_clusters[0])
+
 #show_clusters(image, lines, labels)
 #show_lines(image, lines)
 #key_points = ORB(gray)
