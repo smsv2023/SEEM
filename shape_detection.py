@@ -275,6 +275,62 @@ def find_edge_candidates(lines):
     top_clusters = np.argsort(ratings)[-2:]
     return top_clusters
 
+# for each cluster, find the upper most lines
+# the upper most lines will be the candiate edge of the further sides
+# need to move all the lines along their direction to have same center 'x'
+def find_upper_most_lines(lines, labels):
+    uppermost_lines = []
+    clusters = np.unique(labels)
+    for i in clusters:
+        group_lines = lines[labels == i]
+        # Compute the center point of each line
+        centers = np.mean(group_lines[:, [0, 2]], axis=1), np.mean(group_lines[:, [1, 3]], axis=1)
+        # Compute the direction of each line
+        directions = np.arctan2(group_lines[:, 3] - group_lines[:, 1], group_lines[:, 2] - group_lines[:, 0])
+        # Move each line along its direction so that its center point has the same x-coordinate
+        avg_x = np.mean(centers[0])
+        moved_centers = centers[0] + (avg_x - centers[0]) * np.cos(directions), centers[1] + (avg_x - centers[0]) * np.sin(directions)
+        # The line with the smallest y-coordinate is the uppermost
+        uppermost_line = group_lines[np.argmin(moved_centers[1])]
+        uppermost_lines.append(uppermost_line) 
+    return uppermost_lines
+
+# for each cluster, find the lower most pair of parallel lines
+# the upper most lines will be the candiate edge of the further sides
+# need to move all the lines along their direction to have same center 'x'
+def find_lowest_parallel_pairs(lines, labels):
+    lowermost_pairs = []
+    clusters = np.unique(labels)
+    for i in clusters:
+        group_lines = lines[labels == i]
+        # Compute the length of each line
+        lengths = np.sqrt((group_lines[:, 0] - group_lines[:, 2])**2 + (group_lines[:, 1] - group_lines[:, 3])**2)
+        # Only consider lines that are long enough
+        long_lines = group_lines[lengths > length_threshold]  # adjust the threshold as needed
+        # Compute the slope of each line
+        slopes = (long_lines[:, 3] - long_lines[:, 1]) / (long_lines[:, 2] - long_lines[:, 0] + 1e-8)
+        # Sort the lines by their slope
+        sorted_indices = np.argsort(slopes)
+        sorted_lines = long_lines[sorted_indices]
+        # Find the pair of lines with the smallest difference in slope
+        min_diff = np.inf
+        lowermost_pair = None
+        for j in range(len(sorted_lines) - 1):
+            diff = np.abs(slopes[sorted_indices[j+1]] - slopes[sorted_indices[j]])
+            if diff < min_diff:
+                # Compute the center point of each line
+                centers = np.mean(sorted_lines[[j, j+1], [0, 2]], axis=1), np.mean(sorted_lines[[j, j+1], [1, 3]], axis=1)
+                # Compute the direction of each line
+                directions = np.arctan2(sorted_lines[[j, j+1], 3] - sorted_lines[[j, j+1], 1], sorted_lines[[j, j+1], 2] - sorted_lines[[j, j+1], 0])
+                # Move each line along its direction so that its center point has the same x-coordinate
+                avg_x = np.mean(centers[0])
+                moved_centers = centers[0] + (avg_x - centers[0]) * np.cos(directions), centers[1] + (avg_x - centers[0]) * np.sin(directions)
+                # The pair with the largest y-coordinate is the lowermost
+                if np.max(moved_centers[1]) < min_diff:
+                    min_diff = np.max(moved_centers[1])
+                lowermost_pair = sorted_lines[[j, j+1]]
+        lowermost_pairs.append(lowermost_pair)
+
 # not finished yet
 def filter_lines(lines, angle_threshold, length_threshold):
     filtered_lines = []
