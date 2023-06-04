@@ -231,12 +231,13 @@ def lines_intersect(line1, line2):
     distances1 = np.sqrt((line1[0, 2] - intersection_point[0])**2 + (line1[1, 3] - intersection_point[1])**2)
     distances2 = np.sqrt((line2[0, 2] - intersection_point[0])**2 + (line2[1, 3] - intersection_point[1])**2)
     return distances1, distances2
+
     
 def find_top_clusters(lines, angle_threshold=5, length_threshold=100, close_threshold=20):
     orientations = find_orientations(lines)
 
     # Use DBSCAN to cluster the lines based on their orientations
-    dbscan = DBSCAN(eps=np.pi/32, min_samples=5).fit(orientations)  # adjust the parameters as needed
+    dbscan = DBSCAN(eps=np.pi/(180/angle_threshold), min_samples=5).fit(orientations)  # adjust the parameters as needed
     labels = dbscan.labels_
     
     # Step 2: Rating Clusters
@@ -249,7 +250,7 @@ def find_top_clusters(lines, angle_threshold=5, length_threshold=100, close_thre
         group_lengths = np.sqrt((group_lines[:, 0] - group_lines[:, 2])**2 + (group_lines[:, 1] - group_lines[:, 3])**2)
         # Only consider lines that are long enough
         long_lines = group_lines[lengths > length_threshold]  # adjust the threshold as needed
-        ratings[i] += 1 if lenth(long_lines)>0 else 0
+        ratings[i] += 1 if len(long_lines)>0 else 0
 
         # Criterion 2: line closer the edge of the convex hull of the line cluster
         for i in clusters:
@@ -264,13 +265,12 @@ def find_top_clusters(lines, angle_threshold=5, length_threshold=100, close_thre
                     ratings[i] += 1
 
         # Criterion 3: Contains lines with starting/ending points close to starting/ending points of other high rating cluster
-        # You'll need to implement this part based on your specific requirements
         for j in clusters:
             if i < j:
                 group_lines_j = lines[labels == j]
                 for line_i in group_lines:
                     for line_j in group_lines_j:
-                        distances1, distances2 = lines_intersect(line_i, line_j)
+                        distances_i, distances_j = lines_intersect(line_i, line_j)
                         if np.any(distances_i < 10) and np.any(distances_j < close_threshold):  # adjust the threshold as needed
                             ratings[i] += 1
                             ratings[j] += 1
@@ -300,7 +300,7 @@ def find_top_clusters(lines, angle_threshold=5, length_threshold=100, close_thre
             angles2 = np.abs(np.arctan2(group2_lines[:,3] - group2_lines[:,1], group2_lines[:,2] - group2_lines[:,0]))
             median_angle1 = np.median(angles1)
             median_angle2 = np.median(angles2)
-            if np.abs(median_angle1 - median_angle2) > np.pi/6:  # adjust the threshold as needed
+            if np.abs(median_angle1 - median_angle2) > np.pi/(180/angle_threshold):  # adjust the threshold as needed
                 top_clusters.append(i)
         if len(top_clusters) == 2:
             break
@@ -308,6 +308,73 @@ def find_top_clusters(lines, angle_threshold=5, length_threshold=100, close_thre
     # Select the top 2 rated clusters
     # top_clusters = np.argsort(ratings)[-2:]
     return top_clusters, vertical_clusters[0]
+
+def rate_lines(lines, clusters, top_clusters, vertical_cluster, close_threshold=20, length_threshold=100):
+    ratings = np.zeros(len(lines))
+    for i in range(len(lines)):
+        line = lines[i]
+        cluster = clusters[i]
+        # Compute the length of the line
+        length = np.sqrt((line[0] - line[2])**2 + (line[1] - line[3])**2)
+        
+        if cluster in top_clusters:
+            # Criterion 1: Close to the edge of the convex hull
+            group_lines = lines[clusters == cluster]
+            group_points = group_lines.reshape(-1, 2)
+            hull = ConvexHull(group_points)
+            min_distance = distance_to_hull(hull, line)
+            if min_distance < close_threshold:
+                ratings[i] += 1
+
+            # Criterion 2: Upper most line
+            if line[1] == np.min(group_lines[:, [1, 3]]):
+                ratings[i] += 3
+
+            # Criterion 3: One of the lower most lines
+            if line[3] == np.max(group_lines[:, [1, 3]]):
+                ratings[i] += 1
+
+            # Criterion 4: In parallel to another one of the lower most lines and not the lowest line
+            lower_lines = group_lines[group_lines[:, 3] == np.max(group_lines[:, [1, 3]])]
+            if len(lower_lines) > 1 and line[3] != np.max(lower_lines[:, 3]):
+                ratings[i] += 1
+
+            # Criterion 5: Intersects with a line in the other top cluster
+            other_top_cluster = top_clusters[0] if cluster == top_clusters[1] else top_clusters[1]
+            other_top_lines = lines[clusters == other_top_cluster]
+            for other_line in other_top_lines:
+                if lines_intersect(line, other_line):
+                    ratings[i] += 1
+
+            # Criterion 6: Intersects with a line in the vertical cluster
+            vertical_lines = lines[clusters == vertical_cluster]
+            for vertical_line in vertical_lines:
+                if lines_intersect(line, vertical_line):
+                    ratings[i] += 1
+
+            # Criterion 7: Long line
+            if length > length_threshold:
+                ratings[i] += 1
+        elif cluster == vertical_cluster:
+            # Criterion 1: Close to the center of the cluster horizontally
+            center_x = np.mean(group_lines[:, [0, 2]])
+            if np.abs(line[0] - center_x) < close_threshold or np.abs(line[2] - center_x) < close_threshold:
+                ratings[i] += 1
+
+            # Criterion 2: Intersects with a line in one of the top clusters
+            for top_cluster in top_clusters:
+                top_lines = lines[clusters == top_cluster]
+                for top_line in top_lines:
+                    if lines_intersect(line, top_line):
+                        ratings[i] += 1
+
+            # Criterion 3: Long line
+            if length > length_threshold:
+                ratings[i] += 1
+
+    return ratings
+
+
 
 # for each cluster, find the upper/lower most lines
 # the upper most lines will be the candiate edge of the further sides
