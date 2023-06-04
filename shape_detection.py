@@ -6,6 +6,7 @@ from sklearn.cluster import DBSCAN
 from sklearn.metrics import pairwise_distances_argmin_min
 from shapely.geometry import LineString
 from scipy.spatial.distance import pdist
+from scipy.spatial import ConvexHull
 
 # find out the longest distance of two pixels in the masked area
 def find_mask_size(mask):
@@ -231,33 +232,57 @@ def lines_intersect(line1, line2):
     distances2 = np.sqrt((line2[0, 2] - intersection_point[0])**2 + (line2[1, 3] - intersection_point[1])**2)
     return distances1, distances2
     
-def find_edge_candidates(lines):
-    orientations = find_orientations(lines)
+def find_edge_candidates(lines, angle_threshold=5, length_threshold=100, close_threshold=20):
+    #orientations = find_orientations(lines)
+    vertical_clusters = np.where(abs(orientations) > np.pi/36)[0] # threshold is 5 degree 
+
     # Use DBSCAN to cluster the lines based on their orientations
     dbscan = DBSCAN(eps=np.pi/32, min_samples=5).fit(orientations)  # adjust the parameters as needed
     labels = dbscan.labels_
     
     # Compute the average orientation of each cluster
     clusters = np.unique(labels)
-    avg_orientations = np.array([orientations[labels == i].mean() for i in clusters])
+    #avg_orientations = np.array([orientations[labels == i].mean() for i in clusters])
     
+    # Exclude clusters with vertical orientation
+    vertical_clusters = []
+    for i in clusters:
+        group_lines = lines[labels == i]
+        angles = np.abs(np.arctan2(group_lines[:,3] - group_lines[:,1], group_lines[:,2] - group_lines[:,0]))
+        median_angle = np.median(angles)
+        if np.abs(np.pi/2 - median_angle) < np.pi/(180/angle_threshold):  # threshold is 5 degree
+            vertical_clusters.append(i)
+    
+    non_vertical_clusters = [i for i in clusters if i not in vertical_clusters]
+        
     # Step 2: Rating Clusters
     ratings = np.zeros(len(clusters))
     for i in clusters:
-        # Criterion 1: Contains more long lines
+        # Criterion 1: Contains long lines
         group_lines = lines[labels == i]
-        group_lengths = np.sqrt((group_lines[:, 2] - group_lines[:, 0])**2 + (group_lines[:, 3] - group_lines[:, 1])**2)
-        ratings[i] += group_lengths.sum()
+        # Compute the length of each line
+        group_lengths = np.sqrt((group_lines[:, 0] - group_lines[:, 2])**2 + (group_lines[:, 1] - group_lines[:, 3])**2)
+        # Only consider lines that are long enough
+        long_lines = group_lines[lengths > length_threshold]  # adjust the threshold as needed
+        ratings[i] += 1 if lenth(long_lines)>0 else 0
 
         # Criterion 2: More perpendicular to any high rating other groups
-        diff = np.abs(avg_orientations[i] - avg_orientations)
-        diff = np.min(diff, np.pi - diff)
-        ratings[i] += np.sum(diff > np.pi/2 - np.pi/8)  # adjust the tolerance as needed
+        # It doesn't hold due to the perspective distortion
+        # diff = np.abs(avg_orientations[i] - avg_orientations)
+        # diff = np.min(diff, np.pi - diff)
+        # ratings[i] += np.sum(diff > np.pi/2 - np.pi/8)  # adjust the tolerance as needed
 
-        # Criterion 3: Long line are more close the edge of the bounding box of the line cluster
-        bbox = np.vstack([group_lines[:, :2], group_lines[:, 2:]]).min(axis=0), np.vstack([group_lines[:, :2], group_lines[:, 2:]]).max(axis=0)
-        distances, _ = pairwise_distances_argmin_min(group_lines.reshape(-1, 2), np.array(bbox))
-        ratings[i] += np.sum(distances < 10)  # adjust the threshold as needed
+        # Criterion 3: Long line are more close the edge of the convex hull of the line cluster
+        for i in clusters:
+            group_lines = lines[labels == i]
+            group_points = group_lines.reshape(-1, 2)
+            hull = ConvexHull(group_points)
+            hull_polygon = Polygon(group_points[hull.vertices])
+            for line in group_lines:
+                line_geom = LineString([(line[0], line[1]), (line[2], line[3])])
+                min_distance = hull_polygon.boundary.distance(line_geom)
+                if min_distance < close_threshold:  # adjust the threshold as needed
+                    ratings[i] += 1
 
         # Criterion 4: Contains lines with starting/ending points close to starting/ending points of other high rating cluster
         # You'll need to implement this part based on your specific requirements
@@ -267,7 +292,7 @@ def find_edge_candidates(lines):
                 for line_i in group_lines:
                     for line_j in group_lines_j:
                         distances1, distances2 = lines_intersect(line_i, line_j)
-                        if np.any(distances_i < 10) and np.any(distances_j < 10):  # adjust the threshold as needed
+                        if np.any(distances_i < 10) and np.any(distances_j < close_threshold):  # adjust the threshold as needed
                             ratings[i] += 1
                             ratings[j] += 1
                             
@@ -275,11 +300,12 @@ def find_edge_candidates(lines):
     top_clusters = np.argsort(ratings)[-2:]
     return top_clusters
 
-# for each cluster, find the upper most lines
+# for each cluster, find the upper/lower most lines
 # the upper most lines will be the candiate edge of the further sides
 # need to move all the lines along their direction to have same center 'x'
-def find_upper_most_lines(lines, labels):
+def find_upper_lower_most_lines(lines, labels):
     uppermost_lines = []
+    lowermost_lines = []
     clusters = np.unique(labels)
     for i in clusters:
         group_lines = lines[labels == i]
@@ -291,9 +317,11 @@ def find_upper_most_lines(lines, labels):
         avg_x = np.mean(centers[0])
         moved_centers = centers[0] + (avg_x - centers[0]) * np.cos(directions), centers[1] + (avg_x - centers[0]) * np.sin(directions)
         # The line with the smallest y-coordinate is the uppermost
-        uppermost_line = group_lines[np.argmin(moved_centers[1])]
-        uppermost_lines.append(uppermost_line) 
-    return uppermost_lines
+        uppermost_line_index = np.argmin(moved_centers[1])
+        lowermost_line_index = np.argmax(moved_centers[1])
+        uppermost_lines.append(group_lines[uppermost_line_index])
+        lowermost_lines.append(group_lines[lowermost_line_index])
+    return uppermost_lines, lowermost_lines
 
 # for each cluster, find the lower most pair of parallel lines
 # the upper most lines will be the candiate edge of the further sides
@@ -328,8 +356,9 @@ def find_lowest_parallel_pairs(lines, labels):
                 # The pair with the largest y-coordinate is the lowermost
                 if np.max(moved_centers[1]) < min_diff:
                     min_diff = np.max(moved_centers[1])
-                lowermost_pair = sorted_lines[[j, j+1]]
-        lowermost_pairs.append(lowermost_pair)
+                    lowermost_pair = sorted_lines[[j, j+1]]
+            lowermost_pairs.append(lowermost_pair)
+    return lowermost_pairs
 
 # not finished yet
 def filter_lines(lines, angle_threshold, length_threshold):
