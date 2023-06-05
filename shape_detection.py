@@ -239,47 +239,66 @@ def lines_intersect(line1, line2):
     return distances1, distances2
 
 #helper function for find_top_clusters
-def _rate_clusters(lines, labels, angle_threshold=5, length_threshold=500, close_threshold=20):
+def contains_long_line(group_lines, length_threshold=500):
+    # Compute the length of each line
+    group_lengths = np.sqrt((group_lines[:, 0] - group_lines[:, 2])**2 + (group_lines[:, 1] - group_lines[:, 3])**2)
+    # Only consider lines that are long enough
+    long_lines = group_lines[group_lengths > length_threshold]  # adjust the threshold as needed
+    return 1 if len(long_lines)>0 else 0
+
+#helper function for find_top_clusters
+def contains_line_close_to_all_line_convex_hull(lines, group_lines, close_threshold=20):
+    all_points = lines.reshape(-1, 2)
+    hull = ConvexHull(all_points)
+    hull_polygon = Polygon(all_points[hull.vertices])
+    for line in group_lines:
+        line_geom = LineString([(line[0], line[1]), (line[2], line[3])])
+        min_distance = hull_polygon.boundary.distance(line_geom)
+        if min_distance < close_threshold:  # adjust the threshold as needed
+            return 1
+    return 0
+ 
+#helper function for find_top_clusters
+def contains_line_intersect_with_other_cluster(group_lines1, group_lines2, close_threshold=20):
+    for line_i in group_lines1:
+        for line_j in group_lines2:
+            distances_i, distances_j = lines_intersect(line_i, line_j)
+            if np.any(distances_i < close_threshold) and np.any(distances_j < close_threshold):  # adjust the threshold as needed
+                return 1
+    return 0
+    
+#helper function for find_top_clusters
+def rate_clusters(lines, labels, angle_threshold=5, length_threshold=500, close_threshold=20):
     clusters = np.unique(labels)        
     ratings = np.zeros(len(clusters))
     for i in clusters:
         if i!=-1:
-            break
+            continue
         # Criterion 1: Contains long lines
         group_lines = lines[labels == i]
-        # Compute the length of each line
-        group_lengths = np.sqrt((group_lines[:, 0] - group_lines[:, 2])**2 + (group_lines[:, 1] - group_lines[:, 3])**2)
-        # Only consider lines that are long enough
-        long_lines = group_lines[group_lengths > length_threshold]  # adjust the threshold as needed
-        ratings[i] += 1 if len(long_lines)>0 else 0
+        ratings[i] += contains_long_line(group_lines, length_threshold)
 
-        # Criterion 2: line closer the edge of the convex hull of the all-line cluster
-        for i in clusters:
-            group_lines = lines[labels == i]
-            all_points = lines.reshape(-1, 2)
-            hull = ConvexHull(all_points)
-            hull_polygon = Polygon(all_points[hull.vertices])
-            for line in group_lines:
-                line_geom = LineString([(line[0], line[1]), (line[2], line[3])])
-                min_distance = hull_polygon.boundary.distance(line_geom)
-                if min_distance < close_threshold:  # adjust the threshold as needed
-                    ratings[i] += 1
-                    break
+        # Criterion 2: line closer the edge of the convex hull of the all-line cluster       
+        ratings[i] += contains_line_close_to_all_line_convex_hull(lines, group_lines, close_threshold)
 
         # Criterion 3: Contains lines with starting/ending points close to starting/ending points of other high rating cluster
         for j in clusters:
+            if j!=-1: 
+                continue
             if i < j:
                 group_lines_j = lines[labels == j]
-                for line_i in group_lines:
-                    for line_j in group_lines_j:
-                        distances_i, distances_j = lines_intersect(line_i, line_j)
-                        if np.any(distances_i < 10) and np.any(distances_j < close_threshold):  # adjust the threshold as needed
-                            ratings[i] += 1
-                            ratings[j] += 1
+                intersect = contains_line_intersect_with_other_cluster(group_lines1, group_lines2, close_threshold)
+                ratings[i] += intersect
+                ratings[j] += intersect
 
     # Get the indices of the clusters sorted by their ratings
-    sorted_clusters = np.argsort(ratings)[::-1]
-    return sorted_clusters
+    #sorted_clusters = np.argsort(ratings)[::-1]
+    
+    sorted_indices = np.argsort(ratings)[::-1]
+    sorted_clusters = clusters[sorted_indices]
+    
+    return sorted_clusters, clusters, ratings
+
 # cluster lines by orientation, and then find the top clusters for table edges, and table leg
 def find_top_clusters(lines, angle_threshold=5, length_threshold=500, close_threshold=20):
     orientations = find_orientations(lines)
@@ -290,7 +309,7 @@ def find_top_clusters(lines, angle_threshold=5, length_threshold=500, close_thre
     labels = dbscan.labels_
     
     # Step 2: Rating Clusters
-    sorted_clusters = _rate_clusters(lines, labels, angle_threshold, length_threshold, close_threshold)
+    sorted_clusters, clusters, ratings = rate_clusters(lines, labels, angle_threshold, length_threshold, close_threshold)
     
     # Exclude clusters with vertical orientation
     horizontal_clusters = []
@@ -321,7 +340,7 @@ def find_top_clusters(lines, angle_threshold=5, length_threshold=500, close_thre
             
     # Select the top 2 rated clusters
     # top_clusters = np.argsort(ratings)[-2:]
-    return labels, top_clusters.reshape(-1,1), vertical_clusters[0]
+    return labels, top_clusters, vertical_clusters[0]
 
 # find the top lines in the top clusters
 # not finished
@@ -487,7 +506,10 @@ labels = clustering.labels_
 representative_lines=find_representative_lines(lines, labels)
 #show_lines(image, representative_lines)
 # find top clusters for table edges and leg candidates:
-edge_clusters, leg_cluster = find_top_clusters(representative_lines, angle_threshold=5, length_threshold=100, close_threshold=20)
+angle_threshold=5
+length_threshold=500
+close_threshold=20
+edge_labels, edge_clusters, leg_cluster = find_top_clusters(representative_lines, angle_threshold=5, length_threshold=100, close_threshold=20)
 #show_clusters(image, lines, edge_clusters[0])
 
 #show_clusters(image, lines, labels)
