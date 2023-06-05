@@ -272,7 +272,7 @@ def rate_clusters(lines, labels, angle_threshold=5, length_threshold=500, close_
     clusters = np.unique(labels)        
     ratings = np.zeros(len(clusters))
     for i in clusters:
-        if i!=-1:
+        if i=-1:
             continue
         # Criterion 1: Contains long lines
         group_lines = lines[labels == i]
@@ -283,7 +283,7 @@ def rate_clusters(lines, labels, angle_threshold=5, length_threshold=500, close_
 
         # Criterion 3: Contains lines with starting/ending points close to starting/ending points of other high rating cluster
         for j in clusters:
-            if j!=-1: 
+            if j=-1: 
                 continue
             if i < j:
                 group_lines_j = lines[labels == j]
