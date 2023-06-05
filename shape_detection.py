@@ -230,12 +230,14 @@ def lines_intersect(line1, line2):
     line2_geom = LineString([(line2[0], line2[1]), (line2[2], line2[3])])
     intersection = line1_geom.intersection(line2_geom)
     if intersection.is_empty:
-        return np.inf
+        return np.inf, np.inf
     intersection_point = np.array([intersection.x, intersection.y])
     #distances1 = np.sqrt((group_lines_i[:, [0, 2]] - intersection_point[0])**2 + (group_lines_i[:, [1, 3]] - intersection_point[1])**2)
     #distances2 = np.sqrt((group_lines_j[:, [0, 2]] - intersection_point[0])**2 + (group_lines_j[:, [1, 3]] - intersection_point[1])**2)
-    distances1 = np.sqrt((line1[0, 2] - intersection_point[0])**2 + (line1[1, 3] - intersection_point[1])**2)
-    distances2 = np.sqrt((line2[0, 2] - intersection_point[0])**2 + (line2[1, 3] - intersection_point[1])**2)
+    distances1 = min(np.sqrt((line1[0] - intersection_point[0])**2 + (line1[1] - intersection_point[1])**2),
+                     np.sqrt((line1[2] - intersection_point[0])**2 + (line1[3] - intersection_point[1])**2))
+    distances2 = min(np.sqrt((line2[0] - intersection_point[0])**2 + (line2[1] - intersection_point[1])**2),
+                     np.sqrt((line2[2] - intersection_point[0])**2 + (line2[3] - intersection_point[1])**2))
     return distances1, distances2
 
 #helper function for find_top_clusters
