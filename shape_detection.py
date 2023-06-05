@@ -287,7 +287,7 @@ def rate_clusters(lines, labels, angle_threshold=5, length_threshold=500, close_
                 continue
             if i < j:
                 group_lines_j = lines[labels == j]
-                intersect = contains_line_intersect_with_other_cluster(group_lines1, group_lines2, close_threshold)
+                intersect = contains_line_intersect_with_other_cluster(group_lines, group_lines_j, close_threshold)
                 ratings[i] += intersect
                 ratings[j] += intersect
 
